@@ -86,6 +86,7 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'receipts.middleware.NoCacheHeaders'
 ]
 
 ROOT_URLCONF = 'receipt_checking.urls'

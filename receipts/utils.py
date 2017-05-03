@@ -7,6 +7,10 @@ import datetime
 luovu_api = LuovuApi(settings.LUOVU_BUSINESS_ID, settings.LUOVU_PARTNER_TOKEN)
 luovu_api.authenticate(settings.LUOVU_USERNAME, settings.LUOVU_PASSWORD)
 
+def refresh_receipt(user_email, receipt_id):
+    receipt_data = luovu_api.get_receipt(receipt_id)
+    process_receipt(user_email, receipt_data)
+
 def get_latest_month_for_user(user_email):
     """ Returns latest month when specified user had receipts or invoice rows """
     try:
@@ -25,6 +29,30 @@ def get_latest_month_for_user(user_email):
         return latest_invoice
     return max(latest_invoice, latest_receipt)
 
+def process_receipt(user_email, receipt):
+    obj, created = LuovuReceipt.objects.update_or_create(luovu_id=receipt["id"], defaults={
+        "luovu_user": user_email,
+        "business_id": settings.LUOVU_BUSINESS_ID,
+        "barcode": receipt["barcode"],
+        "description": receipt["description"],
+        "filename": receipt["filename"],
+        "mime_type": receipt["mime_type"],
+        "date": datetime.datetime.strptime(receipt["date"], "%Y-%m-%d").date(),
+        "state": receipt["state"],
+        "receipt_type": receipt["type"],
+        "uploader": receipt["uploader"],
+    })
+    LuovuPrice.objects.filter(receipt=obj).delete()
+    total_price = 0
+    for price in receipt["prices"]:
+        if price["price"].startswith("-"):
+            continue
+        parsed_price = luovu_api.format_price(price["price"])
+        price_obj = LuovuPrice(price=parsed_price, vat_percent=int(price["vat_percent"]), receipt=obj)
+        price_obj.save()
+        total_price += parsed_price
+    obj.price = total_price
+    obj.save()
 
 def get_all_users():
     people_with_invoices = InvoiceRow.objects.values_list("card_holder_email_guess").distinct()
@@ -44,28 +72,5 @@ def refresh_receipts_for_user(user_email, start_date, end_date):
     receipts = luovu_api.get_receipts(user_email, start_date, end_date)
     for receipt in receipts:
         receipt_count += 1
-        obj, created = LuovuReceipt.objects.update_or_create(luovu_id=receipt["id"], defaults={
-            "luovu_user": user_email,
-            "business_id": settings.LUOVU_BUSINESS_ID,
-            "barcode": receipt["barcode"],
-            "description": receipt["description"],
-            "filename": receipt["filename"],
-            "mime_type": receipt["mime_type"],
-            "date": datetime.datetime.strptime(receipt["date"], "%Y-%m-%d").date(),
-            "state": receipt["state"],
-            "receipt_type": receipt["type"],
-            "uploader": receipt["uploader"],
-        })
-        if not created:
-            LuovuPrice.objects.filter(receipt=obj).delete()
-            total_price = 0
-            for price in receipt["prices"]:
-                if price["price"].startswith("-"):
-                    continue
-                parsed_price = luovu_api.format_price(price["price"])
-                price_obj = LuovuPrice(price=parsed_price, vat_percent=int(price["vat_percent"]), receipt=obj)
-                price_obj.save()
-                total_price += parsed_price
-            obj.price = total_price
-            obj.save()
+        process_receipt(user_email, receipt)
     return receipt_count

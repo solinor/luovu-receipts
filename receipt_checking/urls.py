@@ -10,6 +10,7 @@ urlpatterns = [
     url(r'^people$', receipts.views.people_list, name='people'),
     url(r'^receipt/(?P<receipt_id>[0-9]+)$', receipts.views.receipt_details, name='receipt'),
     url(r'^receipt/(?P<receipt_id>[0-9]+)/image', receipts.views.receipt_image, name='receipt_image'),
+    url(r'^redirect_to_luovu/(?P<user_email>[a-zA-Z0-9-_\.@]+)/(?P<receipt_id>[0-9]+)$', receipts.views.redirect_to_luovu, name='redirect_to_luovu'),
     url(r'^$', receipts.views.frontpage, name='frontpage'),
     url(r'^queue_update$', receipts.views.queue_update, name="queue_update"),
     url(r'^accounts/profile/$', RedirectView.as_view(pattern_name='frontpage', permanent=False)),

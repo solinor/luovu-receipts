@@ -76,7 +76,7 @@
       {% if row.2 %}
       <td class="vertical-separator"><a href="{% url 'receipt' row.2.luovu_id %}">{% if row.2.has_description %}{{ row.2.description }}{% else %}[no description]{% endif %}</a></td>
       <td class="price">{{ row.2.price }}&euro;</td>
-      <td><a href="https://app.luovu.com/a/#i/{{ row.2.luovu_id }}">Luovu</td>
+      <td><a href="{% url "redirect_to_luovu" user_email row.2.luovu_id %}">Luovu</td>
       {% else %}
       <td class="vertical-separator"></td>
       <td></td>

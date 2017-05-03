@@ -7,7 +7,7 @@ from django.contrib import messages
 
 from receipts.models import LuovuReceipt, InvoiceRow, InvoiceReceipt
 from receipts.tables import ReceiptsTable
-from receipts.utils import get_all_users, refresh_receipts_for_user, get_latest_month_for_user
+from receipts.utils import get_all_users, refresh_receipts_for_user, get_latest_month_for_user, refresh_receipt
 from receipts.luovu_api import LuovuApi
 
 from dateutil.relativedelta import relativedelta
@@ -21,6 +21,11 @@ luovu_api = LuovuApi(settings.LUOVU_BUSINESS_ID, settings.LUOVU_PARTNER_TOKEN)
 luovu_api.authenticate(settings.LUOVU_USERNAME, settings.LUOVU_PASSWORD)
 def parse_date(date_string):
     return datetime.datetime.strptime(date_string, "%Y-%m-%d").date()
+
+@login_required
+def redirect_to_luovu(request, user_email, receipt_id):
+    request.session["refresh_data"] = {"user_email": user_email, "receipt_id": receipt_id}
+    return HttpResponseRedirect("https://app.luovu.com/a/#i/%s" % receipt_id)
 
 @login_required
 def queue_update(request):
@@ -99,6 +104,18 @@ def people_list(request):
 def person_details(request, user_email, year, month):
     year = int(year)
     month = int(month)
+    start_date = datetime.date(year, month, 1)
+    end_date = start_date.replace(day=calendar.monthrange(year, month)[1]) + datetime.timedelta(days=32)
+    start_date = start_date - datetime.timedelta(days=32)
+
+    if request.session.get("refresh_data"):
+        refresh_data = request.session["refresh_data"]
+        refresh_user_email = refresh_data["user_email"]
+        refresh_receipt_id = refresh_data["receipt_id"]
+        request.session["refresh_data"] = False
+        print refresh_user_email, refresh_receipt_id
+        refresh_receipt(refresh_user_email, refresh_receipt_id)
+
     user_invoice = InvoiceRow.objects.filter(card_holder_email_guess=user_email).filter(invoice_date__year=year, invoice_date__month=month)
     user_receipts = LuovuReceipt.objects.filter(luovu_user=user_email).filter(date__year=year, date__month=month).exclude(state="deleted")
 
@@ -116,9 +133,6 @@ def person_details(request, user_email, year, month):
         table_rows[item.date]["receipt_rows"].append(item)
         receipts_total += item.price
 
-    start_date = datetime.date(year, month, 1)
-    end_date = start_date.replace(day=calendar.monthrange(year, month)[1]) + datetime.timedelta(days=32)
-    start_date = start_date - datetime.timedelta(days=32)
     sorted_table = sorted(table_rows.items())
     table = []
     for date, content in sorted_table:
