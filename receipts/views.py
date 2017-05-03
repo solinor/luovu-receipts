@@ -1,19 +1,37 @@
 from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError, HttpResponseBadRequest
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
 
 from receipts.models import LuovuReceipt, InvoiceRow, InvoiceReceipt
 from receipts.tables import ReceiptsTable
-from receipts.utils import get_all_users
+from receipts.utils import get_all_users, refresh_receipts_for_user
 from receipts.luovu_api import LuovuApi
 
 import base64
+import calendar
+import datetime
 
 
 luovu_api = LuovuApi(settings.LUOVU_BUSINESS_ID, settings.LUOVU_PARTNER_TOKEN)
 luovu_api.authenticate(settings.LUOVU_USERNAME, settings.LUOVU_PASSWORD)
+def parse_date(date_string):
+    return datetime.datetime.strptime(date_string, "%Y-%m-%d").date()
+
+@login_required
+def queue_update(request):
+    if request.method == "POST":
+        return_url = request.POST.get("back") or reverse("frontpage")
+        user_email = request.POST.get("user_email")
+        if user_email is None:
+            return HttpResponseBadRequest("Missing user_email")
+        end_date = parse_date(request.POST.get("end_date", (datetime.datetime.now() + datetime.timedelta(days=10)).strftime("%Y-%m-%d")))
+        start_date = parse_date(request.POST.get("start_date", (datetime.datetime.now() - datetime.timedelta(days=60)).strftime("%Y-%m-%d")))
+        refresh_receipts_for_user(user_email, start_date, end_date)
+        return HttpResponseRedirect(return_url)
+    return HttpResponseBadRequest()
+
 
 @login_required
 def frontpage(request):
@@ -65,6 +83,8 @@ def person_details(request, user_email, year, month):
             table_rows[item.date] = {"invoice_rows": [], "receipt_rows": []}
         table_rows[item.date]["receipt_rows"].append(item)
 
+    start_date = datetime.date(year, month, 1)
+    end_date = start_date.replace(day=calendar.monthrange(year, month)[1])
 
-    context = {"table": sorted(table_rows.items())}
+    context = {"table": sorted(table_rows.items()), "user_email": user_email, "start_date": start_date, "end_date": end_date}
     return render(request, "person_details.html", context)

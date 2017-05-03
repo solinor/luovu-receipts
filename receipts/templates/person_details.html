@@ -16,6 +16,19 @@
   <li class="active">Person</li>
 </ol>
 
+<div class="row" style="padding-bottom: 1em">
+  <div class="col-md-12">
+    <form method="post" action="{% url 'queue_update' %}" class="form-inline" style="display: inline-block">
+      {% csrf_token %}
+      <input type="hidden" name="user_email" value="{{ user_email }}">
+      <input type="hidden" name="back" value="{{ request.get_full_path }}">
+      <input type="hidden" name="start_date" value="{{ start_date }}">
+      <input type="hidden" name="end_date" value="{{ end_date }}">
+      <button role="submit" class="btn btn-info">Update data from Luovu</button>
+    </form>
+  </div>
+</div>
+
 <table class="table table-condensed table-hover">
   <thead>
     <tr>

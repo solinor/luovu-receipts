@@ -10,7 +10,8 @@ urlpatterns = [
     url(r'^people$', receipts.views.people_list, name='people'),
     url(r'^receipt/(?P<receipt_id>[0-9]+)$', receipts.views.receipt_details, name='receipt'),
     url(r'^receipt/(?P<receipt_id>[0-9]+)/image', receipts.views.receipt_image, name='receipt_image'),
-    url(r'^accounts/profile/$', RedirectView.as_view(pattern_name='frontpage', permanent=False)),
     url(r'^$', receipts.views.frontpage, name='frontpage'),
+    url(r'^queue_update$', receipts.views.queue_update, name="queue_update"),
+    url(r'^accounts/profile/$', RedirectView.as_view(pattern_name='frontpage', permanent=False)),
     url(r'^accounts/', include('googleauth.urls')),
 ]

@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 from django.db import models
 
 class InvoiceRow(models.Model):
-    row_identifier = models.IntegerField(primary_key=True, editable=False)
+    row_identifier = models.CharField(max_length=100, primary_key=True, editable=False)
     description = models.CharField(max_length=255)
     card_holder = models.CharField(max_length=100)
     card_holder_id = models.CharField(max_length=100, null=True, blank=True)
@@ -18,6 +18,9 @@ class InvoiceRow(models.Model):
     row_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
     invoice_date = models.DateField()
+
+    class Meta:
+        ordering = ("delivery_date", "row_price")
 
     def __unicode__(self):
         return u"%s - %s - %s" % (self.row_identifier, self.card_holder, self.row_price)
@@ -50,6 +53,9 @@ class LuovuReceipt(models.Model):
     receipt_type = models.CharField(max_length=50, null=True, blank=True)
     uploader = models.CharField(max_length=255, null=True, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+
+    class Meta:
+        ordering = ("date", "price")
 
     def __unicode__(self):
         return u"%s: %s - %s, %s" % (self.luovu_id, self.luovu_user, self.description, self.price)
