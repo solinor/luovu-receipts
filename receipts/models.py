@@ -60,6 +60,10 @@ class LuovuReceipt(models.Model):
     def __unicode__(self):
         return u"%s: %s - %s, %s" % (self.luovu_id, self.luovu_user, self.description, self.price)
 
+    def has_description(self):
+        return not (self.description is None or len(self.description) == 0)
+
+
 class LuovuPrice(models.Model):
     receipt = models.ForeignKey("LuovuReceipt")
     price = models.DecimalField(max_digits=10, decimal_places=2)

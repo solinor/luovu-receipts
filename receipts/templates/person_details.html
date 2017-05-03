@@ -68,7 +68,7 @@
         <td></td>
       {% endif %}
       {% if row.2 %}
-      <td><a href="{% url 'receipt' row.2.luovu_id %}">{{ row.2.description }}</a></td>
+      <td><a href="{% url 'receipt' row.2.luovu_id %}">{% if row.2.has_description %}{{ row.2.description }}{% else %}[no description]{% endif %}</a></td>
       <td class="price">{{ row.2.price }}&euro;</td>
       <td><a href="https://app.luovu.com/a/#i/{{ row.2.luovu_id }}">Luovu</td>
       {% else %}
