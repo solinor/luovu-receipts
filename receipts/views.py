@@ -7,7 +7,7 @@ from django.contrib import messages
 
 from receipts.models import LuovuReceipt, InvoiceRow, InvoiceReceipt
 from receipts.tables import ReceiptsTable
-from receipts.utils import get_all_users, refresh_receipts_for_user
+from receipts.utils import get_all_users, refresh_receipts_for_user, get_latest_month_for_user
 from receipts.luovu_api import LuovuApi
 
 from dateutil.relativedelta import relativedelta
@@ -40,8 +40,11 @@ def queue_update(request):
 @login_required
 def frontpage(request):
     if request.user and request.user.email:
-        today = datetime.date.today()
-        return HttpResponseRedirect(reverse("person", args=(request.user.email, today.year, today.month)))
+        latest_month = get_latest_month_for_user(request.user.email)
+        if not latest_month:
+            latest_month = datetime.date.today()
+
+        return HttpResponseRedirect(reverse("person", args=(request.user.email, latest_month.year, latest_month.month)))
     return HttpResponseRedirect(reverse("people"))
 
 @login_required

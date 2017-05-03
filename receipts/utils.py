@@ -7,6 +7,25 @@ import datetime
 luovu_api = LuovuApi(settings.LUOVU_BUSINESS_ID, settings.LUOVU_PARTNER_TOKEN)
 luovu_api.authenticate(settings.LUOVU_USERNAME, settings.LUOVU_PASSWORD)
 
+def get_latest_month_for_user(user_email):
+    """ Returns latest month when specified user had receipts or invoice rows """
+    try:
+        latest_invoice = InvoiceRow.objects.filter(card_holder_email_guess=user_email).values_list("invoice_date").latest("invoice_date")
+        latest_invoice = latest_invoice[0]
+    except InvoiceRow.DoesNotExist:
+        latest_invoice = None
+    try:
+        latest_receipt = LuovuReceipt.objects.filter(luovu_user=user_email).values_list("date").latest("date")
+        latest_receipt = latest_receipt[0]
+    except LuovuReceipt.DoesNotExist:
+        latest_receipt = None
+    if latest_invoice is None:
+        return latest_receipt
+    if latest_receipt is None:
+        return latest_invoice
+    return max(latest_invoice, latest_receipt)
+
+
 def get_all_users():
     people_with_invoices = InvoiceRow.objects.values_list("card_holder_email_guess").distinct()
     people_with_receipts = LuovuReceipt.objects.values_list("luovu_user")
