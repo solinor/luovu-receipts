@@ -87,6 +87,26 @@ def person_details(request, user_email, year, month):
 
     start_date = datetime.date(year, month, 1)
     end_date = start_date.replace(day=calendar.monthrange(year, month)[1])
+    sorted_table = sorted(table_rows.items())
+    table = []
+    for date, content in sorted_table:
+        date_added = False
+        for i in range(max(len(content["invoice_rows"]), len(content["receipt_rows"]))):
+            row = []
+            if not date_added:
+                row.append(date)
+                date_added = True
+            else:
+                row.append("")
+            if i < len(content["invoice_rows"]):
+                row.append(content["invoice_rows"][i])
+            else:
+                row.append(None)
+            if i < len(content["receipt_rows"]):
+                row.append(content["receipt_rows"][i])
+            else:
+                row.append(None)
+            table.append(row)
 
-    context = {"table": sorted(table_rows.items()), "user_email": user_email, "start_date": start_date, "end_date": end_date}
+    context = {"table": table, "user_email": user_email, "start_date": start_date, "end_date": end_date}
     return render(request, "person_details.html", context)
