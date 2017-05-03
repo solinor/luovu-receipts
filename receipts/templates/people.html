@@ -15,9 +15,10 @@
   <tbody>
     {% for person in people %}
     <tr>
-      <td>{{ person }}</td>
-      <td><a href="{% url 'person' person 2017 3 %}">2017-03</a></td>
-      <td><a href="{% url 'person' person 2017 4 %}">2017-04</a></td>
+      <td>{{ person.email }}</td>
+      {% for date in person.dates %}
+      <td>{% if date %}<a href="{% url 'person' person.email date.year date.month %}">{{ date.year }}-{{ date.month }}</a>{% endif %}</td>
+      {% endfor %}
     </tr>
     {% endfor %}
   </tbody>

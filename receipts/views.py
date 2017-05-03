@@ -10,6 +10,8 @@ from receipts.tables import ReceiptsTable
 from receipts.utils import get_all_users, refresh_receipts_for_user
 from receipts.luovu_api import LuovuApi
 
+from dateutil.relativedelta import relativedelta
+
 import base64
 import calendar
 import datetime
@@ -64,9 +66,29 @@ def receipt_details(request, receipt_id):
 
 @login_required
 def people_list(request):
+    today = datetime.date.today().replace(day=1)
+    dates = [today]
+    dates.append(today - relativedelta(months=1))
+    dates.append(today - relativedelta(months=2))
+    dates.append(today - relativedelta(months=3))
+    dates.reverse()
+    dates_set = set(dates)
+    people = [{"email": a, "dates": list(dates)} for a in get_all_users()]
+    invoice_per_person_data = InvoiceRow.objects.values_list("card_holder_email_guess", "invoice_date").order_by("card_holder_email_guess", "invoice_date").distinct("card_holder_email_guess", "invoice_date")
+    invoice_per_person = {}
+    for user_email, invoice_date in invoice_per_person_data:
+        if user_email not in invoice_per_person:
+            invoice_per_person[user_email] = set()
+        invoice_per_person[user_email].add(invoice_date)
 
+    for i, person in enumerate(people):
+        intersection = dates_set.intersection(invoice_per_person[person["email"]])
+        for a, date in enumerate(people[i]["dates"]):
+            if date not in intersection:
+                people[i]["dates"][a] = None
     context = {
-        "people": get_all_users(),
+        "people": people,
+        "dates": dates,
     }
     return render(request, "people.html", context)
 
