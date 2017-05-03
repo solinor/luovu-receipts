@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
@@ -23,7 +23,11 @@ def frontpage(request):
 @login_required
 def receipt_image(request, receipt_id):
     receipt = luovu_api.get_receipt(receipt_id)
-    attachment = base64.b64decode(receipt["attachment"])
+    try:
+        attachment = base64.b64decode(receipt["attachment"])
+    except KeyError:
+        print receipt
+        return HttpResponseServerError("Unable to get receipt attachment.")
     mime_type = receipt["mime_type"]
     return HttpResponse(attachment, content_type=mime_type)
 
