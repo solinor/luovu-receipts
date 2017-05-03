@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% load humanize %}
+
+{% block content %}
+<ol class="breadcrumb">
+  <li><a href="/">Home</a></li>
+  <li class="active">People</li>
+</ol>
+
+
+<h1>People</h1>
+
+<table class="table table-striped">
+  <tbody>
+    {% for person in people %}
+    <tr>
+      <td>{{ person }}</td>
+      <td><a href="{% url 'person' person 2017 3 %}">2017-03</a></td>
+      <td><a href="{% url 'person' person 2017 4 %}">2017-04</a></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

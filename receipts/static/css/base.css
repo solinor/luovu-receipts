@@ -1,0 +1,19 @@
+.body-container {
+  padding-top: 5em;
+}
+h2 {
+  padding-bottom: 1em;
+  padding-top: 1em;
+}
+.number-column {
+  text-align: right;
+}
+.form-inline .form-group {
+  padding-right: 2em;
+}
+.nowrap-column {
+  white-space: nowrap;
+}
+.strikethrough {
+  text-decoration: line-through;
+}

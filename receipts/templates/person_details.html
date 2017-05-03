@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block header %}
+<style>
+.price {
+  text-align: right;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<ol class="breadcrumb">
+  <li><a href="/">Home</a></li>
+  <li><a href="{% url 'people' %}">People</a></li>
+  <li class="active">Person</li>
+</ol>
+
+<table class="table table-condensed table-hover">
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Invoices</th>
+      <th>Receipts</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for date, data in table %}
+    <tr>
+      <td>{{ date }}</td>
+      <td>
+        <table class="table">
+          {% for invoice in data.invoice_rows %}
+          <tr>
+            <td>{{ invoice.description }}</td>
+            <td class="price">{{ invoice.row_price }}&euro;</td>
+          </tr>
+          {% endfor %}
+        </table>
+      </td>
+      <td>
+        <table class="table">
+          {% for receipt in data.receipt_rows %}
+          <tr>
+            <td><a href="{% url 'receipt' receipt.luovu_id %}">{{ receipt.description }}</a></td>
+            <td class="price">{{ receipt.price }}&euro;</td>
+            <td><a href="https://app.luovu.com/a/#i/{{ receipt.luovu_id }}">Luovu</td>
+          </tr>
+          {% endfor %}
+        </table>
+      </td>
+
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

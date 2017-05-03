@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block header %}
+<style>
+.price {
+  text-align: right;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<ol class="breadcrumb">
+  <li><a href="/">Home</a></li>
+  <li><a href="{% url 'people' %}">People</a></li>
+  <li><a href="{% url 'person' receipt.luovu_user receipt.date.year receipt.date.month %}">Person: {{ receipt.luovu_user }}</a></li>
+  <li class="active">Receipt</li>
+</ol>
+
+<h2>Receipt by {{ receipt.luovu_user }}</h2>
+
+<img src="{% url "receipt_image" receipt.luovu_id %}">
+{% endblock %}
