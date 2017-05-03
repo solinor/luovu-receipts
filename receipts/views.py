@@ -37,8 +37,10 @@ def queue_update(request):
 
 @login_required
 def frontpage(request):
+    if request.user and request.user.email:
+        today = datetime.date.today()
+        return HttpResponseRedirect(reverse("person", args=(request.user.email, today.year, today.month)))
     return HttpResponseRedirect(reverse("people"))
-    return render(request, "frontpage.html", {})
 
 @login_required
 def receipt_image(request, receipt_id):
