@@ -86,7 +86,8 @@ def person_details(request, user_email, year, month):
         table_rows[item.date]["receipt_rows"].append(item)
 
     start_date = datetime.date(year, month, 1)
-    end_date = start_date.replace(day=calendar.monthrange(year, month)[1])
+    end_date = start_date.replace(day=calendar.monthrange(year, month)[1]) + datetime.timedelta(days=32)
+    start_date = start_date - datetime.timedelta(days=32)
     sorted_table = sorted(table_rows.items())
     table = []
     for date, content in sorted_table:
