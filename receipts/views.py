@@ -136,7 +136,7 @@ def person_details(request, user_email, year, month):
                 row.append(None)
             table.append(row)
 
-    previous_months = InvoiceRow.objects.filter(card_holder_email_guess=user_email).values_list("invoice_date").order_by("invoice_date").distinct("invoice_date")
+    previous_months = InvoiceRow.objects.filter(card_holder_email_guess=user_email).values_list("invoice_date").order_by("-invoice_date").distinct("invoice_date")
 
     context = {"table": table, "user_email": user_email, "start_date": start_date, "end_date": end_date, "previous_months": previous_months, "year": year, "month": month}
     return render(request, "person_details.html", context)
