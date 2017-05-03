@@ -102,15 +102,19 @@ def person_details(request, user_email, year, month):
     user_invoice = InvoiceRow.objects.filter(card_holder_email_guess=user_email).filter(invoice_date__year=year, invoice_date__month=month)
     user_receipts = LuovuReceipt.objects.filter(luovu_user=user_email).filter(date__year=year, date__month=month).exclude(state="deleted")
 
+    invoice_total = 0
+    receipts_total = 0
     table_rows = {}
     for item in user_invoice:
         if item.delivery_date not in table_rows:
             table_rows[item.delivery_date] = {"invoice_rows": [], "receipt_rows": []}
         table_rows[item.delivery_date]["invoice_rows"].append(item)
+        invoice_total += item.row_price
     for item in user_receipts:
         if item.date not in table_rows:
             table_rows[item.date] = {"invoice_rows": [], "receipt_rows": []}
         table_rows[item.date]["receipt_rows"].append(item)
+        receipts_total += item.price
 
     start_date = datetime.date(year, month, 1)
     end_date = start_date.replace(day=calendar.monthrange(year, month)[1]) + datetime.timedelta(days=32)
@@ -138,5 +142,5 @@ def person_details(request, user_email, year, month):
 
     previous_months = InvoiceRow.objects.filter(card_holder_email_guess=user_email).values_list("invoice_date").order_by("-invoice_date").distinct("invoice_date")
 
-    context = {"table": table, "user_email": user_email, "start_date": start_date, "end_date": end_date, "previous_months": previous_months, "year": year, "month": month}
+    context = {"table": table, "user_email": user_email, "start_date": start_date, "end_date": end_date, "previous_months": previous_months, "year": year, "month": month, "invoice_total": invoice_total, "receipts_total": receipts_total}
     return render(request, "person_details.html", context)

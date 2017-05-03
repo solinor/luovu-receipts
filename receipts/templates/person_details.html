@@ -6,6 +6,12 @@
 .price {
   text-align: right;
 }
+.summary-row th {
+  border-top-width: 3px !important;
+}
+.vertical-separator {
+  border-left: 1px solid #ddd;
+}
 </style>
 {% endblock %}
 
@@ -45,13 +51,13 @@
   </div>
 </div>
 
-<table class="table table-condensed table-hover">
+<table class="table table-hover">
   <thead>
     <tr>
       <th>Date</th>
-      <th>Invoice</th>
+      <th class="vertical-separator">Invoice</th>
       <th></th>
-      <th>Receipt</th>
+      <th class="vertical-separator">Receipt</th>
       <th></th>
       <th></th>
     </tr>
@@ -61,24 +67,34 @@
     <tr>
       <td>{{ row.0 }}</td>
       {% if row.1 %}
-        <td>{{ row.1.description }}</td>
+        <td class="vertical-separator">{{ row.1.description }}</td>
         <td class="price">{{ row.1.row_price }}&euro;{% if row.1.foreign_currency %} ({{ row.1.foreign_currency}} {{ row.1.foreign_currency_name}}){% endif %}</td>
       {% else %}
-        <td></td>
+        <td class="vertical-separator"></td>
         <td></td>
       {% endif %}
       {% if row.2 %}
-      <td><a href="{% url 'receipt' row.2.luovu_id %}">{% if row.2.has_description %}{{ row.2.description }}{% else %}[no description]{% endif %}</a></td>
+      <td class="vertical-separator"><a href="{% url 'receipt' row.2.luovu_id %}">{% if row.2.has_description %}{{ row.2.description }}{% else %}[no description]{% endif %}</a></td>
       <td class="price">{{ row.2.price }}&euro;</td>
       <td><a href="https://app.luovu.com/a/#i/{{ row.2.luovu_id }}">Luovu</td>
       {% else %}
-      <td></td>
+      <td class="vertical-separator"></td>
       <td></td>
       <td></td>
       {% endif %}
     </tr>
     {% endfor %}
   </tbody>
+  <tfoot>
+    <tr class="summary-row">
+      <th></th>
+      <th></th>
+      <th class="price">{{ invoice_total }}&euro;</th>
+      <th class="vertical-separator"></th>
+      <th class="price">{{ receipts_total }}&euro;</th>
+      <th></th>
+    </tr>
+  </tfoot>
 </table>
 
 {% endblock %}
