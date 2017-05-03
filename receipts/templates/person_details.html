@@ -46,7 +46,7 @@
           {% for invoice in data.invoice_rows %}
           <tr>
             <td>{{ invoice.description }}</td>
-            <td class="price">{{ invoice.row_price }}&euro;</td>
+            <td class="price">{{ invoice.row_price }}&euro;{% if invoice.foreign_currency %} ({{ invoice.foreign_currency}} {{ invoice.foreign_currency_name}}){% endif %}</td>
           </tr>
           {% endfor %}
         </table>
