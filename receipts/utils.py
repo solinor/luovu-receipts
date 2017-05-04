@@ -1,15 +1,27 @@
-from receipts.models import LuovuReceipt, LuovuPrice, InvoiceRow
-from django.contrib.auth.models import User
-from receipts.luovu_api import LuovuApi
-from django.conf import settings
 import datetime
 
-luovu_api = LuovuApi(settings.LUOVU_BUSINESS_ID, settings.LUOVU_PARTNER_TOKEN)
+from receipts.models import LuovuReceipt, LuovuPrice, InvoiceRow
+from receipts.luovu_api import LuovuApi
+from django.contrib.auth.models import User
+from django.conf import settings
+
+luovu_api = LuovuApi(settings.LUOVU_BUSINESS_ID, settings.LUOVU_PARTNER_TOKEN)  # pylint:disable=invalid-name
 luovu_api.authenticate(settings.LUOVU_USERNAME, settings.LUOVU_PASSWORD)
+
+
+def check_data_refresh(request):
+    if request.session.get("refresh_data"):
+        refresh_data = request.session["refresh_data"]
+        refresh_user_email = refresh_data["user_email"]
+        refresh_receipt_id = refresh_data["receipt_id"]
+        request.session["refresh_data"] = False
+        refresh_receipt(refresh_user_email, refresh_receipt_id)
+
 
 def refresh_receipt(user_email, receipt_id):
     receipt_data = luovu_api.get_receipt(receipt_id)
     process_receipt(user_email, receipt_data)
+
 
 def get_latest_month_for_user(user_email):
     """ Returns latest month when specified user had receipts or invoice rows """
@@ -29,8 +41,9 @@ def get_latest_month_for_user(user_email):
         return latest_invoice
     return max(latest_invoice, latest_receipt)
 
+
 def process_receipt(user_email, receipt):
-    obj, created = LuovuReceipt.objects.update_or_create(luovu_id=receipt["id"], defaults={
+    obj, _ = LuovuReceipt.objects.update_or_create(luovu_id=receipt["id"], defaults={
         "luovu_user": user_email,
         "business_id": settings.LUOVU_BUSINESS_ID,
         "barcode": receipt["barcode"],
@@ -54,6 +67,7 @@ def process_receipt(user_email, receipt):
     obj.price = total_price
     obj.save()
 
+
 def get_all_users():
     people_with_invoices = InvoiceRow.objects.values_list("card_holder_email_guess").distinct()
     people_with_receipts = LuovuReceipt.objects.values_list("luovu_user")
@@ -66,6 +80,7 @@ def get_all_users():
     for item in django_users:
         people.add(item[0])
     return sorted(people)
+
 
 def refresh_receipts_for_user(user_email, start_date, end_date):
     receipt_count = 0

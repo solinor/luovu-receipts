@@ -10,8 +10,8 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 """
 
 import os
-import dj_database_url
 import sys
+import dj_database_url
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -70,7 +70,7 @@ INSTALLED_APPS = [
     # Disable Django's own staticfiles handling in favour of WhiteNoise, for
     # greater consistency between gunicorn and `./manage.py runserver`. See:
     # http://whitenoise.evans.io/en/stable/django.html#using-whitenoise-in-development
-#    'whitenoise.runserver_nostatic',
+    # 'whitenoise.runserver_nostatic',
     'googleauth',
     'django.contrib.staticfiles',
     'receipts',
@@ -151,8 +151,8 @@ DATETIME_FORMAT = "Y-m-d H:i"
 SHORT_DATETIME_FORMAT = "Y-m-d H:i"
 
 # Update database configuration with $DATABASE_URL.
-db_from_env = dj_database_url.config(conn_max_age=500)
-DATABASES['default'].update(db_from_env)
+DB_FROM_ENV = dj_database_url.config(conn_max_age=500)
+DATABASES['default'].update(DB_FROM_ENV)
 
 # Honor the 'X-Forwarded-Proto' header for request.is_secure()
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
