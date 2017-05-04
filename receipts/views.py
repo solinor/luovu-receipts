@@ -58,7 +58,6 @@ def receipt_image(request, receipt_id):
     try:
         attachment = base64.b64decode(receipt["attachment"])
     except KeyError:
-        print receipt
         return HttpResponseServerError("Unable to get receipt attachment.")
     mime_type = receipt["mime_type"]
     return HttpResponse(attachment, content_type=mime_type)
@@ -113,7 +112,6 @@ def person_details(request, user_email, year, month):
         refresh_user_email = refresh_data["user_email"]
         refresh_receipt_id = refresh_data["receipt_id"]
         request.session["refresh_data"] = False
-        print refresh_user_email, refresh_receipt_id
         refresh_receipt(refresh_user_email, refresh_receipt_id)
 
     user_invoice = InvoiceRow.objects.filter(card_holder_email_guess=user_email).filter(invoice_date__year=year, invoice_date__month=month)
