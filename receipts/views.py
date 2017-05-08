@@ -119,7 +119,10 @@ def people_list(request):
         invoice_per_person[user_email].add(invoice_date)
 
     for i, person in enumerate(people):
-        intersection = dates_set.intersection(invoice_per_person[person["email"]])
+        if person["email"] in invoice_per_person:
+            intersection = dates_set.intersection(invoice_per_person[person["email"]])
+        else:
+            intersection = []
         for a, date in enumerate(people[i]["dates"]):
             if date not in intersection:
                 people[i]["dates"][a] = None
