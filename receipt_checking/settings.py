@@ -30,6 +30,7 @@ LUOVU_USERNAME = os.environ["LUOVU_USERNAME"]
 LUOVU_PASSWORD = os.environ["LUOVU_PASSWORD"]
 LUOVU_BUSINESS_ID = os.environ["LUOVU_BUSINESS_ID"]
 
+SLACK_BOT_ACCESS_TOKEN = os.environ["SLACK_BOT_ACCESS_TOKEN"]
 
 AUTHENTICATION_BACKENDS = (
     'googleauth.backends.GoogleAuthBackend',

@@ -3,6 +3,21 @@ from __future__ import unicode_literals
 from django.db import models
 
 
+class CcUser(models.Model):
+    email = models.EmailField(primary_key=True)
+    slack_id = models.CharField(max_length=50, null=True, blank=True)
+
+    def __unicode__(self):
+        return self.email
+
+class SlackChat(models.Model):
+    chat_id = models.CharField(max_length=50, primary_key=True, editable=False)
+    members = models.ManyToManyField(CcUser)
+
+    def __unicode__(self):
+        return self.chat_id
+
+
 class InvoiceRow(models.Model):
     row_identifier = models.CharField(max_length=100, primary_key=True, editable=False)
     description = models.CharField(max_length=255)
