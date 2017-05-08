@@ -7,11 +7,13 @@ from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerEr
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 
 from receipts.models import LuovuReceipt, InvoiceRow
 from receipts.utils import get_all_users, refresh_receipts_for_user, get_latest_month_for_user, check_data_refresh
 from receipts.luovu_api import LuovuApi
+from receipts.forms import UploadFileForm
 
 from dateutil.relativedelta import relativedelta
 
@@ -126,6 +128,25 @@ def people_list(request):
         "dates": dates,
     }
     return render(request, "people.html", context)
+
+
+@staff_member_required
+def upload_invoice_html(request):
+    if request.method == "POST":
+        form = UploadFileForm(request.POST, request.FILES)
+        if form.is_valid():
+            invoice_date = datetime.date(form.year, form.month, 1)
+            html_parser = HtmlParser(form.file)
+            invoices = html_parser.process()
+            for invoice in invoices:
+                invoice["invoice_date"] = invoice_date
+                InvoiceRow.objects.update_or_create(row_identifier=invoice["row_identifier"], defaults=invoice)
+
+            messages.add_message(request, messages.INFO, "File imported for %s-%s" % (form.year, form.month))
+            return HttpResponseRedirect(reverse("frontpage"))
+    else:
+        form = UploadFileForm()
+    return render(request, "import.html", {"form": form})
 
 
 @login_required

@@ -15,4 +15,5 @@ urlpatterns = [
     url(r'^queue_update$', receipts.views.queue_update, name="queue_update"),
     url(r'^accounts/profile/$', RedirectView.as_view(pattern_name='frontpage', permanent=False)),
     url(r'^accounts/', include('googleauth.urls')),
+    url(r'^import_html$', receipts.views.upload_invoice_html, name="import_html"),
 ]

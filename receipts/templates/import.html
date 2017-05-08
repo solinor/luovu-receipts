@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<form method="post" action="{% url 'import_html' %}">
+{% csrf_token %}
+{{ form.as_p }}
+</form>
+
+{% endblock %}

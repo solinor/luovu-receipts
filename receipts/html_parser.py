@@ -15,11 +15,14 @@ class HtmlParser(object):
         "Vaihtokurssi": ("foreign_currency_rate", float),
     }
 
-    def __init__(self, filename):
-        if filename == "-":
-            self.soup = BeautifulSoup(sys.stdin)
+    def __init__(self, filename, **kwargs):
+        if filename:
+            if filename == "-":
+                self.soup = BeautifulSoup(sys.stdin)
+            else:
+                self.soup = BeautifulSoup(open(filename))
         else:
-            self.soup = BeautifulSoup(open(filename))
+            self.soup = BeautifulSoup(kwargs["content"])
 
     @classmethod
     def parse_price(cls, line):
