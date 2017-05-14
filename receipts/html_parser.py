@@ -5,14 +5,18 @@ import datetime
 from BeautifulSoup import BeautifulSoup
 
 
+def null_op(data):
+    return data
+
+
 class HtmlParser(object):
     FIELD_CONFIG = {
-        "Tuotetunnus": ("row_identifier", str),
-        "Kuvaus": ("description", str),
-        "Henkilönumero": ("card_holder_id", str),
-        "MCC koodi": ("cc_code", str),
-        "MCC selite": ("cc_description", str),
-        "Vaihtokurssi": ("foreign_currency_rate", float),
+        u"Tuotetunnus": (u"row_identifier", null_op),
+        u"Kuvaus": (u"description", null_op),
+        u"Henkilönumero": (u"card_holder_id", null_op),
+        u"MCC koodi": (u"cc_code", null_op),
+        u"MCC selite": (u"cc_description", null_op),
+        u"Vaihtokurssi": (u"foreign_currency_rate", float),
     }
 
     def __init__(self, filename, **kwargs):
@@ -44,18 +48,18 @@ class HtmlParser(object):
             config = cls.FIELD_CONFIG[title]
             return {config[0]: config[1](data)}
 
-        if title == "Toimituspvm (jak)":
-            return {"delivery_date": cls.parse_delivery_date(data)}
-        if title == "Kirjauspvm":
-            return {"record_date": cls.parse_date(data)}
-        if title == "Ulkomaan valuutta":
+        if title == u"Toimituspvm (jak)":
+            return {u"delivery_date": cls.parse_delivery_date(data)}
+        if title == u"Kirjauspvm":
+            return {u"record_date": cls.parse_date(data)}
+        if title == u"Ulkomaan valuutta":
             data = data.split(" ")
-            return {"foreign_currency": cls.parse_price(data[0]),
-                    "foreign_currency_name": data[1]}
-        if title == "Kortinhaltija":
-            if "/" in data:
-                data = data.split("/", 1)[1].strip()
-            return {"card_holder": data, "card_holder_email_guess": cls.parse_card_holder_email(data)}
+            return {u"foreign_currency": cls.parse_price(data[0]),
+                    u"foreign_currency_name": data[1]}
+        if title == u"Kortinhaltija":
+            if u"/" in data:
+                data = data.split(u"/", 1)[1].strip()
+            return {u"card_holder": data, u"card_holder_email_guess": cls.parse_card_holder_email(data)}
         return {}
 
     @classmethod
@@ -87,7 +91,7 @@ class HtmlParser(object):
                     for item in row.find("div", {"class": "data"}).contents:
                         if ":" not in item:
                             continue
-                        item = item.split(": ", 1)
+                        item = item.split(u": ", 1)
                         open_invoice.update(self.process_field(item[0], item[1]))
         if open_invoice:
             invoices.append(open_invoice)
