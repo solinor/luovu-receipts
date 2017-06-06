@@ -63,4 +63,5 @@ It seems you have work to do with your credit card receipts:
                 logger.info("Created a new slack.mpim for %s", user)
             else:
                 slack_chat = slack_chat[0]
-            slack.chat.post_message('G59P3QCVD', slack_message)
+                chat_id = slack_chat.chat_id
+            slack.chat.post_message(chat_id, slack_message)
