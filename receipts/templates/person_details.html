@@ -12,6 +12,9 @@
 .vertical-separator {
   border-left: 1px solid #ddd;
 }
+.matching-row {
+  background-color: #f9fff9;
+}
 </style>
 {% endblock %}
 
@@ -70,19 +73,19 @@
   </thead>
   <tbody>
     {% for row in table %}
-    <tr>
-      <td>{{ row.0 }}</td>
-      {% if row.1 %}
-        <td class="vertical-separator">{{ row.1.description }}</td>
-        <td class="price">{{ row.1.row_price }}&euro;{% if row.1.foreign_currency %} ({{ row.1.foreign_currency}} {{ row.1.foreign_currency_name}}){% endif %}</td>
+    <tr class="{% if row.matching %}matching-row{% endif %}">
+      <td>{{ row.items.0 }}</td>
+      {% if row.items.1 %}
+        <td class="vertical-separator">{{ row.items.1.description }}</td>
+        <td class="price">{{ row.items.1.row_price }}&euro;{% if row.items.1.foreign_currency %} ({{ row.items.1.foreign_currency}} {{ row.items.1.foreign_currency_name}}){% endif %}</td>
       {% else %}
         <td class="vertical-separator"></td>
         <td></td>
       {% endif %}
-      {% if row.2 %}
-      <td class="vertical-separator"><a href="{% url 'receipt' row.2.luovu_id %}">{% if row.2.has_description %}{{ row.2.description }}{% else %}[no description]{% endif %}</a></td>
-      <td class="price">{{ row.2.price }}&euro;</td>
-      <td><a href="{% url "redirect_to_luovu" user_email row.2.luovu_id %}">Luovu</td>
+      {% if row.items.2 %}
+      <td class="vertical-separator"><a href="{% url 'receipt' row.items.2.luovu_id %}">{% if row.items.2.has_description %}{{ row.items.2.description }}{% else %}[no description]{% endif %}</a></td>
+      <td class="price">{{ row.items.2.price }}&euro;</td>
+      <td><a href="{% url "redirect_to_luovu" user_email row.items.2.luovu_id %}">Luovu</td>
       {% else %}
       <td class="vertical-separator"></td>
       <td></td>

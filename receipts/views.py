@@ -31,20 +31,25 @@ def create_receipts_table(sorted_table):
     for date, content in sorted_table:
         date_added = False
         for i in range(max(len(content["invoice_rows"]), len(content["receipt_rows"]))):
-            row = []
+            row = {"matching": False, "items": []}
             if not date_added:
-                row.append(date)
+                row["items"].append(date)
                 date_added = True
             else:
-                row.append("")
+                row["items"].append("")
             if i < len(content["invoice_rows"]):
-                row.append(content["invoice_rows"][i])
+                row["items"].append(content["invoice_rows"][i])
             else:
-                row.append(None)
+                row["items"].append(None)
             if i < len(content["receipt_rows"]):
-                row.append(content["receipt_rows"][i])
+                row["items"].append(content["receipt_rows"][i])
             else:
-                row.append(None)
+                row["items"].append(None)
+
+            if row["items"][1] and row["items"][2]:
+                if row["items"][1].row_price == row["items"][2].price:
+                    row["matching"] = True
+
             table.append(row)
     return table
 
