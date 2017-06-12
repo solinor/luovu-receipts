@@ -15,6 +15,9 @@
 .matching-row {
   background-color: #f9fff9;
 }
+.non-matching-row {
+  background-color: #fff5f5;
+}
 </style>
 {% endblock %}
 
@@ -73,7 +76,7 @@
   </thead>
   <tbody>
     {% for row in table %}
-    <tr class="{% if row.matching %}matching-row{% endif %}">
+    <tr class="{% if not row.matching %}non-matching-row{% endif %}">
       <td>{{ row.items.0 }}</td>
       {% if row.items.1 %}
         <td class="vertical-separator">{{ row.items.1.description }}</td>
