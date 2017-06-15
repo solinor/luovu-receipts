@@ -32,11 +32,7 @@ def create_receipts_table(sorted_table):
         date_added = False
         for i in range(max(len(content["invoice_rows"]), len(content["receipt_rows"]))):
             row = {"matching": False, "items": []}
-            if not date_added:
-                row["items"].append(date)
-                date_added = True
-            else:
-                row["items"].append("")
+            row["items"].append(date)
             if i < len(content["invoice_rows"]):
                 row["items"].append(content["invoice_rows"][i])
             else:
