@@ -25,12 +25,14 @@
 <table class="table">
   <tbody>
     {% for person in people %}
+    {% if person.dates %}
     <tr>
       <td>{{ person.email }}</td>
       {% for date in person.dates %}
       <td class="{% if date.date %}{% if date.match %}matching-row{% else %}non-matching-row{% endif %}{% endif %}">{% if date.date %}<a href="{% url 'person' person.email date.date.year date.date.month %}">{{ date.date.year }}-{{ date.date.month }} ({{ date.receipt_rows }} / {{ date.invoice_rows }})</a>{% endif %}</td>
       {% endfor %}
     </tr>
+    {% endif %}
     {% endfor %}
   </tbody>
 </table>
