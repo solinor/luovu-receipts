@@ -114,7 +114,7 @@ def people_list(request):
     dates_set = set(dates)
     people = [{"email": a, "dates": []} for a in get_all_users()]
     invoice_per_person_data = InvoiceRow.objects.values_list("card_holder_email_guess", "invoice_date").order_by("card_holder_email_guess", "invoice_date").annotate(rowcount=Count("row_identifier"))
-    receipts_per_user_data = LuovuReceipt.objects.annotate(month=TruncMonth("date")).values_list("luovu_user", "month").order_by("luovu_user", "month").annotate(rowcount=Count("pk"))
+    receipts_per_user_data = LuovuReceipt.objects.exclude(status="deleted").annotate(month=TruncMonth("date")).values_list("luovu_user", "month").order_by("luovu_user", "month").annotate(rowcount=Count("pk"))
     invoice_per_person = {}
     for user_email, invoice_date, cnt in invoice_per_person_data:
         if user_email not in invoice_per_person:
