@@ -128,11 +128,10 @@ def people_list(request):
         invoice_per_person[user_email][receipt_date]["receipt_rows"] = cnt
 
     for i, person in enumerate(people):
-        if person["email"] in invoice_per_person:
-            intersection = dates_set.intersection(invoice_per_person[person["email"]].keys())
-        else:
-            people[i]["dates"] = [{} for date in dates]
+        if person["email"] not in invoice_per_person:
+            people[i]["dates"] = False
             continue
+        intersection = dates_set.intersection(invoice_per_person[person["email"]].keys())
         tmp = []
         for date in dates:
             if date not in invoice_per_person[person["email"]]:
