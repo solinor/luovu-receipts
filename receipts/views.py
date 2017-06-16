@@ -138,8 +138,10 @@ def people_list(request):
             if date not in invoice_per_person[person["email"]]:
                 people[i]["dates"].append({})
             else:
-                status = False
-                people[i]["dates"].append({"date": date, "status": status, "invoice_rows": invoice_per_person[person["email"]][date].get("invoice_rows", 0), "receipt_rows": invoice_per_person[person["email"]][date].get("receipt_rows", 0)})
+                row = {"date": date, "match": False, "invoice_rows": invoice_per_person[person["email"]][date].get("invoice_rows", 0), "receipt_rows": invoice_per_person[person["email"]][date].get("receipt_rows", 0)}
+                if row["invoice_rows"] == row["receipt_rows"]:
+                    row["match"] = True
+                people[i]["dates"].append(row)
 
     context = {
         "people": people,

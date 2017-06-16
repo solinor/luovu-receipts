@@ -2,6 +2,17 @@
 
 {% load humanize %}
 
+{% block header %}
+<style>
+.matching-row {
+  background-color: #daffda;
+}
+.non-matching-row {
+  background-color: #ffdada;
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <ol class="breadcrumb">
   <li><a href="/">Home</a></li>
@@ -17,7 +28,7 @@
     <tr>
       <td>{{ person.email }}</td>
       {% for date in person.dates %}
-      <td>{% if date.date %}<a href="{% url 'person' person.email date.date.year date.date.month %}">{{ date.date.year }}-{{ date.date.month }} ({{ date.receipt_rows }} / {{ date.invoice_rows }})</a>{% endif %}</td>
+      <td class="{% if date.match %}matching-row{% else %}non-matching-row{% endif %}">{% if date.date %}<a href="{% url 'person' person.email date.date.year date.date.month %}">{{ date.date.year }}-{{ date.date.month }} ({{ date.receipt_rows }} / {{ date.invoice_rows }})</a>{% endif %}</td>
       {% endfor %}
     </tr>
     {% endfor %}
