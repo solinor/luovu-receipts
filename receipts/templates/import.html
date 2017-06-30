@@ -5,6 +5,7 @@
 <form method="post" action="{% url 'import_html' %}">
 {% csrf_token %}
 {{ form.as_p }}
+<input type="submit" name="Import">
 </form>
 
 {% endblock %}
