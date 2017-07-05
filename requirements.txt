@@ -11,3 +11,5 @@ pytz==2017.2
 django-filter==1.0.2
 python-dateutil==2.6.0
 slacker==0.9.42
+BeautifulSoup==3.2.1
+
