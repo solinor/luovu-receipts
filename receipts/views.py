@@ -154,14 +154,14 @@ def upload_invoice_html(request):
     if request.method == "POST":
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
-            invoice_date = datetime.date(form.year, form.month, 1)
-            html_parser = HtmlParser(form.file)
+            invoice_date = datetime.date(form.cleaned_data["year"], form.cleaned_data["month"], 1)
+            html_parser = HtmlParser(request.FILES["file"])
             invoices = html_parser.process()
             for invoice in invoices:
                 invoice["invoice_date"] = invoice_date
                 InvoiceRow.objects.update_or_create(row_identifier=invoice["row_identifier"], defaults=invoice)
 
-            messages.add_message(request, messages.INFO, "File imported for %s-%s" % (form.year, form.month))
+            messages.add_message(request, messages.INFO, "File imported for %s-%s" % (form.cleaned_data["year"], form.cleaned_data["month"]))
             return HttpResponseRedirect(reverse("frontpage"))
     else:
         form = UploadFileForm()
