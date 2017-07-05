@@ -15,6 +15,7 @@ from receipts.models import LuovuReceipt, InvoiceRow
 from receipts.utils import get_all_users, refresh_receipts_for_user, get_latest_month_for_user, check_data_refresh
 from receipts.luovu_api import LuovuApi
 from receipts.forms import UploadFileForm
+from receipts.html_parser import HtmlParser
 
 from dateutil.relativedelta import relativedelta
 
