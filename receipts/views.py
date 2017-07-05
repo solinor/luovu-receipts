@@ -156,7 +156,7 @@ def upload_invoice_html(request):
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
             invoice_date = datetime.date(form.cleaned_data["year"], form.cleaned_data["month"], 1)
-            html_parser = HtmlParser(request.FILES["file"])
+            html_parser = HtmlParser(None, file_obj=request.FILES["file"])
             invoices = html_parser.process()
             for invoice in invoices:
                 invoice["invoice_date"] = invoice_date

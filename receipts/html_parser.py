@@ -2,7 +2,7 @@
 import sys
 import datetime
 
-from BeautifulSoup import BeautifulSoup
+from bs4 import BeautifulSoup
 
 
 def null_op(data):
@@ -22,11 +22,13 @@ class HtmlParser(object):
     def __init__(self, filename, **kwargs):
         if filename:
             if filename == "-":
-                self.soup = BeautifulSoup(sys.stdin)
+                self.soup = BeautifulSoup(sys.stdin, "html.parser")
             else:
-                self.soup = BeautifulSoup(open(filename))
-        else:
-            self.soup = BeautifulSoup(kwargs["content"])
+                self.soup = BeautifulSoup(open(filename), "html.parser")
+        elif "content" in kwargs:
+            self.soup = BeautifulSoup(kwargs["content"], "html.parser")
+        elif "file_obj" in kwargs:
+            self.soup = BeautifulSoup(kwargs["file_obj"], "html.parser")
 
     @classmethod
     def parse_price(cls, line):
@@ -74,25 +76,25 @@ class HtmlParser(object):
         invoices = []
         open_invoice = {}
         for row in self.soup.findAll("tr"):
-            for attr_key, attr_value in row.attrs:
-                if attr_key == "class" and attr_value == "InvoiceRow details":
-                    if open_invoice:
-                        invoices.append(open_invoice)
-                        open_invoice = {}
-                    for item in row.findAll("td", {"class": "multiData"}):
-                        detail_title = item.find("div", {"class": "title"})
-                        if not detail_title:
-                            continue
-                        detail_title = detail_title.text
-                        detail_content = item.find("div", {"class": "data"}).text
-                        open_invoice.update(self.process_field(detail_title, detail_content))
-                    open_invoice["row_price"] = self.parse_price(row.find("td", {"class": "RowAmount"}).find("div", {"class": "data"}).text)
-                elif attr_key == "class" and attr_value == "InvoiceRow freeText":
-                    for item in row.find("div", {"class": "data"}).contents:
-                        if ":" not in item:
-                            continue
-                        item = item.split(u": ", 1)
-                        open_invoice.update(self.process_field(item[0], item[1]))
+            attr_value = row.attrs.get("class", [])
+            if "InvoiceRow" in attr_value and "details" in attr_value:
+                if open_invoice:
+                    invoices.append(open_invoice)
+                    open_invoice = {}
+                for item in row.findAll("td", {"class": "multiData"}):
+                    detail_title = item.find("div", {"class": "title"})
+                    if not detail_title:
+                        continue
+                    detail_title = detail_title.text
+                    detail_content = item.find("div", {"class": "data"}).text
+                    open_invoice.update(self.process_field(detail_title, detail_content))
+                open_invoice["row_price"] = self.parse_price(row.find("td", {"class": "RowAmount"}).find("div", {"class": "data"}).text)
+            elif "InvoiceRow" in attr_value and "freeText" in attr_value:
+                for item in row.find("div", {"class": "data"}).contents:
+                    if ":" not in item:
+                        continue
+                    item = item.split(u": ", 1)
+                    open_invoice.update(self.process_field(item[0], item[1]))
         if open_invoice:
             invoices.append(open_invoice)
         return invoices
