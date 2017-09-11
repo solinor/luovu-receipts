@@ -67,6 +67,7 @@ def queue_update(request):
             return HttpResponseBadRequest("Missing user_email")
         end_date = parse_date(request.POST.get("end_date", (datetime.datetime.now() + datetime.timedelta(days=10)).strftime("%Y-%m-%d")))
         start_date = parse_date(request.POST.get("start_date", (datetime.datetime.now() - datetime.timedelta(days=60)).strftime("%Y-%m-%d")))
+        print("Refreshing results for %s: %s-%s" % (user_email, start_date, end_date))
         count = refresh_receipts_for_user(user_email, start_date, end_date)
         messages.add_message(request, messages.INFO, 'Luovu data for this view has been updated (%s).' % count)
         return HttpResponseRedirect(return_url)
