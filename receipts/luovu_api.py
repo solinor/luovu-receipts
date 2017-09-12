@@ -1,4 +1,5 @@
 import requests
+import uuid
 
 
 class LuovuApi(object):
@@ -28,7 +29,7 @@ class LuovuApi(object):
     def get_receipts(self, email, start_date, end_date, retry=0):
         if retry > 2:
             return
-        response = requests.get("https://api.luovu.com/api/items?username=%s&business_id=%s&business_unit=1234&startdate=%s&enddate=%s" % (email, self.business_id, start_date.strftime("%Y-%m-%d"), end_date.strftime("%Y-%m-%d")), headers={"X-Luovu-Authentication-Partner-Token": self.partner_token, "X-Luovu-Authentication-Access-Token": self.user_token})
+        response = requests.get("https://api.luovu.com/api/items?username=%s&business_id=%s&business_unit=1234&startdate=%s&enddate=%s&random=%s" % (email, self.business_id, start_date.strftime("%Y-%m-%d"), end_date.strftime("%Y-%m-%d"), uuid.uuid4()), headers={"X-Luovu-Authentication-Partner-Token": self.partner_token, "X-Luovu-Authentication-Access-Token": self.user_token})
         data = response.json()
         if isinstance(data, dict) and data.get("msg") == u'Invalid authKey.':
             self.authenticate(None, None, True)
