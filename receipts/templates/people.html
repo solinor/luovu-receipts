@@ -53,6 +53,7 @@
       <th class="number-column">Invoices &euro;</th>
       <th class="number-column">Receipts #</th>
       <th class="number-column">Invoices #</th>
+      <th class="number-column">Empty descriptions</th>
       <th class="number-column">Cash &euro;</th>
       <th class="number-column">Cash #</th>
     </tr>
@@ -66,6 +67,7 @@
       <td class="number-column {% if person.data.sum_match %}matching-row{% else %}non-matching-row{% endif %}">{% if person.data.invoice_sum %}{{ person.data.invoice_sum|floatformat:2 }}{% endif %}</td>
       <td class="number-column {% if person.data.count_match %}matching-row{% else %}non-matching-row{% endif %}">{% if person.data.receipt_rows %}{{ person.data.receipt_rows }}{% endif %}</td>
       <td class="number-column {% if person.data.count_match %}matching-row{% else %}non-matching-row{% endif %}">{% if person.data.invoice_rows > 0 %}{{ person.data.invoice_rows }}{% endif %}</td>
+      <td class="number-column {% if person.data.empty_descriptions > 0 %}non-matching-row{% endif %}">{{ person.data.empty_descriptions }}</td>
       <td class="number-column">{% if person.data.cash_purchase_sum > 0 %}{{ person.data.cash_purchase_sum }}{% endif %}</td>
       <td class="number-column">{% if person.data.cash_purchase_rows > 0 %}{{ person.data.cash_purchase_rows }}{% endif %}</td>
     </tr>

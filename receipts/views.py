@@ -11,7 +11,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from django.db.models import Count, Sum
-from django.db.models.functions import TruncMonth, TruncYear
+from django.db.models.functions import TruncMonth, TruncYear, Length
 from receipts.models import LuovuReceipt, InvoiceRow
 from receipts.utils import get_all_users, refresh_receipts_for_user, get_latest_month_for_user, check_data_refresh
 from receipts.luovu_api import LuovuApi
@@ -123,6 +123,7 @@ def people_list(request, year, month):
     invoice_per_person_data = InvoiceRow.objects.filter(invoice_date__year=year).filter(invoice_date__month=month).values_list("card_holder_email_guess", "invoice_date").order_by("card_holder_email_guess", "invoice_date").annotate(rowcount=Count("row_identifier"))
     receipts_per_user_data = LuovuReceipt.objects.filter(date__year=year, date__month=month).exclude(state="deleted").exclude(account_number=1900).annotate(month=TruncMonth("date")).values_list("luovu_user", "month").order_by("luovu_user", "month").annotate(rowcount=Count("pk"))
     cash_purchases_per_user_data = LuovuReceipt.objects.filter(date__year=year, date__month=month).exclude(state="deleted").filter(account_number=1900).annotate(month=TruncMonth("date")).values_list("luovu_user", "month").order_by("luovu_user", "month").annotate(rowcount=Count("pk"))
+    receipts_without_descriptions = LuovuReceipt.objects.exclude(state="deleted").filter(date__year=year, date__month=month).annotate(description_length=Length("description")).filter(description_length=0).values_list("luovu_user", "description_length").order_by("luovu_user", "description_length").annotate(rowcount=Count("pk"))
 
     invoice_sum_per_person = InvoiceRow.objects.filter(invoice_date__year=year).filter(invoice_date__month=month).values_list("card_holder_email_guess", "invoice_date").order_by("card_holder_email_guess", "invoice_date").annotate(price_sum=Sum("row_price"))
     receipts_sum_per_user = LuovuReceipt.objects.filter(date__year=year, date__month=month).exclude(state="deleted").exclude(account_number=1900).annotate(month=TruncMonth("date")).values_list("luovu_user", "month").order_by("luovu_user", "month").annotate(price_sum=Sum("price"))
@@ -139,6 +140,8 @@ def people_list(request, year, month):
         invoice_per_person[user_email]["receipt_rows"] = cnt
     for user_email, _, cnt in cash_purchases_per_user_data:
         invoice_per_person[user_email]["cash_purchase_rows"] = cnt
+    for user_email, _, cnt in receipts_without_descriptions:
+        invoice_per_person[user_email]["empty_descriptions"] = cnt
     for user_email, _, price_sum in invoice_sum_per_person:
         invoice_per_person[user_email]["invoice_sum"] = price_sum
     for user_email, _, price_sum in receipts_sum_per_user:
@@ -161,6 +164,7 @@ def people_list(request, year, month):
             "invoice_sum": invoice_row["invoice_sum"],
             "receipts_sum": invoice_row["receipts_sum"],
             "cash_purchase_sum": invoice_row["cash_purchase_sum"],
+            "empty_descriptions": invoice_row["empty_descriptions"],
         }
         if row["invoice_rows"] == row["receipt_rows"]:
             row["count_match"] = True
