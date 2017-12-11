@@ -26,25 +26,21 @@ class LuovuApi(object):
             self.user_token = response_data["data"]["access_token"]
         return response_data
 
-    def get_receipts(self, email, start_date, end_date, retry=0):
+    def _retry_request(self, retry, url):
         if retry > 2:
             return
-        response = requests.get("https://api.luovu.com/api/items?username=%s&business_id=%s&business_unit=1234&startdate=%s&enddate=%s&random=%s" % (email, self.business_id, start_date.strftime("%Y-%m-%d"), end_date.strftime("%Y-%m-%d"), uuid.uuid4()), headers={"X-Luovu-Authentication-Partner-Token": self.partner_token, "X-Luovu-Authentication-Access-Token": self.user_token})
+        response = requests.get(url, headers={"X-Luovu-Authentication-Partner-Token": self.partner_token, "X-Luovu-Authentication-Access-Token": self.user_token})
         data = response.json()
         if isinstance(data, dict) and data.get("msg") == u'Invalid authKey.':
             self.authenticate(None, None, True)
-            return self.get_receipts(email, start_date, end_date, retry + 1)
+            return self._retry_request(retry + 1, url)
         return data
 
-    def get_receipt(self, item_id, retry=0):
-        if retry > 2:
-            return
-        response = requests.get("https://api.luovu.com/api/item/%s" % item_id, headers={"X-Luovu-Authentication-Partner-Token": self.partner_token, "X-Luovu-Authentication-Access-Token": self.user_token})
-        data = response.json()
-        if isinstance(data, dict) and data.get("msg") == u'Invalid authKey.':
-            self.authenticate(None, None, True)
-            return self.get_receipt(item_id, retry + 1)
-        return data
+    def get_receipts(self, email, start_date, end_date, retry=0):
+        return self._retry_request(0, "https://api.luovu.com/api/items?username=%s&business_id=%s&business_unit=1234&startdate=%s&enddate=%s&random=%s" % (email, self.business_id, start_date.strftime("%Y-%m-%d"), end_date.strftime("%Y-%m-%d"), uuid.uuid4()))
+
+    def get_receipt(self, item_id):
+        return self._retry_request(0, "https://api.luovu.com/api/item/%s" % item_id)
 
     @classmethod
     def format_price(cls, price):
