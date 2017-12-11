@@ -10,6 +10,13 @@
 .non-matching-row {
   background-color: #ffdada;
 }
+.table a {
+  display:block;
+  text-decoration:none;
+}
+.table .clickable-cell {
+  cursor: pointer;
+}
 </style>
 {% endblock %}
 
@@ -22,16 +29,24 @@
 
 <h1>People</h1>
 
-<p>year-month (receipts / invoice rows + cash purchase rows)</p>
-
 <table class="table">
+  <thead>
+    <tr>
+      <th></th>
+      {% for date in dates %}
+      <th>{{ date|date:"Y-m" }}</th>
+      {% endfor %}
+    </tr>
+  </thead>
   <tbody>
     {% for person in people %}
     {% if person.dates and person.email %}
     <tr>
       <td>{{ person.email }}</td>
       {% for date in person.dates %}
-      <td class="{% if date.date %}{% if date.match %}matching-row{% else %}non-matching-row{% endif %}{% endif %}">{% if date.date %}<a href="{% url 'person' person.email date.date.year date.date.month %}">{{ date.date.year }}-{{ date.date.month }} ({{ date.receipt_rows }} / {{ date.invoice_rows }}{% if date.cash_purchase_rows > 0 %} + {{ date.cash_purchase_rows }}{% endif %})</a>{% endif %}</td>
+      <td {% if date.date %} onclick="window.location='{% url 'person' person.email date.date.year date.date.month %}';"{% endif %} class="{% if date.date %}clickable-cell {% if date.match %}matching-row{% else %}non-matching-row{% endif %}{% endif %}">{% if date.date %}<a href="{% url 'person' person.email date.date.year date.date.month %}"><span class="label label-primary"><span class="glyphicon glyphicon-credit-card" aria-hidden="true"></span> {{ date.receipt_rows }} out of {{ date.invoice_rows }}</span> {% if date.cash_purchase_rows > 0 %} + <span class="label label-success">{{ date.cash_purchase_rows }}</span>{% endif %}<br>
+      {% if date.receipts_sum == date.invoice_sum %}{{ date.receipts_sum|floatformat:"0" }}&euro;{% else %}{{ date.receipts_sum|floatformat:"0" }}&euro; out of {{ date.invoice_sum|floatformat:"0" }}&euro;{% endif %}{% if date.cash_purchase_sum > 0 %} + {{ date.cash_purchase_sum|floatformat:"0" }}&euro; in cash purchases{% endif %}
+      </a>{% endif %}</td>
       {% endfor %}
     </tr>
     {% endif %}

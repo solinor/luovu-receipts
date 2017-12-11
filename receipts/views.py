@@ -1,16 +1,16 @@
 import base64
 import calendar
 import datetime
-from collections import namedtuple
+from collections import namedtuple, defaultdict
 
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError, HttpResponseBadRequest
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
-from django.db.models import Count
+from django.db.models import Count, Sum
 from django.db.models.functions import TruncMonth, TruncYear
 from receipts.models import LuovuReceipt, InvoiceRow
 from receipts.utils import get_all_users, refresh_receipts_for_user, get_latest_month_for_user, check_data_refresh
@@ -33,15 +33,17 @@ def create_receipts_table(sorted_table):
     table = []
     for date, content in sorted_table:
         date_added = False
-        for i in range(max(len(content["invoice_rows"]), len(content["receipt_rows"]))):
+        invoice_rows = sorted(content["invoice_rows"], key=lambda x: x.row_price)
+        receipt_rows = sorted(content["receipt_rows"], key=lambda x: x.price)
+        for i in range(max(len(invoice_rows), len(receipt_rows))):
             row = {"matching": False, "items": []}
             row["items"].append(date)
-            if i < len(content["invoice_rows"]):
-                row["items"].append(content["invoice_rows"][i])
+            if i < len(invoice_rows):
+                row["items"].append(invoice_rows[i])
             else:
                 row["items"].append(None)
-            if i < len(content["receipt_rows"]):
-                row["items"].append(content["receipt_rows"][i])
+            if i < len(receipt_rows):
+                row["items"].append(receipt_rows[i])
             else:
                 row["items"].append(None)
 
@@ -120,23 +122,31 @@ def people_list(request):
     invoice_per_person_data = InvoiceRow.objects.values_list("card_holder_email_guess", "invoice_date").order_by("card_holder_email_guess", "invoice_date").annotate(rowcount=Count("row_identifier"))
     receipts_per_user_data = LuovuReceipt.objects.exclude(state="deleted").exclude(account_number=1900).annotate(month=TruncMonth("date")).values_list("luovu_user", "month").order_by("luovu_user", "month").annotate(rowcount=Count("pk"))
     cash_purchases_per_user_data = LuovuReceipt.objects.exclude(state="deleted").filter(account_number=1900).annotate(month=TruncMonth("date")).values_list("luovu_user", "month").order_by("luovu_user", "month").annotate(rowcount=Count("pk"))
-    invoice_per_person = {}
+
+    invoice_sum_per_person = InvoiceRow.objects.values_list("card_holder_email_guess", "invoice_date").order_by("card_holder_email_guess", "invoice_date").annotate(price_sum=Sum("row_price"))
+    receipts_sum_per_user = LuovuReceipt.objects.exclude(state="deleted").exclude(account_number=1900).annotate(month=TruncMonth("date")).values_list("luovu_user", "month").order_by("luovu_user", "month").annotate(price_sum=Sum("price"))
+    cash_purchases_sum_per_user = LuovuReceipt.objects.exclude(state="deleted").filter(account_number=1900).annotate(month=TruncMonth("date")).values_list("luovu_user", "month").order_by("luovu_user", "month").annotate(price_sum=Sum("price"))
+
+    def gen_daily_dict():
+        return defaultdict(int)
+
+    def gen_user_dict():
+        return defaultdict(gen_daily_dict)
+
+    invoice_per_person = defaultdict(gen_user_dict)
+
     for user_email, invoice_date, cnt in invoice_per_person_data:
-        if user_email not in invoice_per_person:
-            invoice_per_person[user_email] = {}
-        invoice_per_person[user_email][invoice_date] = {"invoice_rows": cnt}
+        invoice_per_person[user_email][invoice_date]["invoice_rows"] = cnt
     for user_email, receipt_date, cnt in receipts_per_user_data:
-        if user_email not in invoice_per_person:
-            invoice_per_person[user_email] = {}
-        if receipt_date not in invoice_per_person[user_email]:
-            invoice_per_person[user_email][receipt_date] = {"invoice_rows": 0}
         invoice_per_person[user_email][receipt_date]["receipt_rows"] = cnt
     for user_email, receipt_date, cnt in cash_purchases_per_user_data:
-        if user_email not in invoice_per_person:
-            invoice_per_person[user_email] = {}
-        if receipt_date not in invoice_per_person[user_email]:
-            invoice_per_person[user_email][receipt_date] = {"invoice_rows": 0}
         invoice_per_person[user_email][receipt_date]["cash_purchase_rows"] = cnt
+    for user_email, receipt_date, price_sum in invoice_sum_per_person:
+        invoice_per_person[user_email][receipt_date]["invoice_sum"] = price_sum
+    for user_email, receipt_date, price_sum in receipts_sum_per_user:
+        invoice_per_person[user_email][receipt_date]["receipts_sum"] = price_sum
+    for user_email, receipt_date, price_sum in cash_purchases_sum_per_user:
+        invoice_per_person[user_email][receipt_date]["cash_purchase_sum"] = price_sum
 
     for i, person in enumerate(people):
         if person["email"] not in invoice_per_person:
@@ -148,8 +158,16 @@ def people_list(request):
             if date not in invoice_per_person[person["email"]]:
                 people[i]["dates"].append({})
             else:
-                row = {"date": date, "match": False, "invoice_rows": invoice_per_person[person["email"]][date].get("invoice_rows", 0), "receipt_rows": invoice_per_person[person["email"]][date].get("receipt_rows", 0), "cash_purchase_rows": invoice_per_person[person["email"]][date].get("cash_purchase_rows", 0)}
-                if row["invoice_rows"] == row["receipt_rows"]:
+                invoice_row = invoice_per_person[person["email"]][date]
+                row = {"date": date, "match": False,
+                       "invoice_rows": invoice_row["invoice_rows"],
+                       "receipt_rows": invoice_row["receipt_rows"],
+                       "cash_purchase_rows": invoice_row["cash_purchase_rows"],
+                       "invoice_sum": invoice_row["invoice_sum"],
+                       "receipts_sum": invoice_row["receipts_sum"],
+                       "cash_purchase_sum": invoice_row["cash_purchase_sum"],
+                }
+                if row["invoice_rows"] == row["receipt_rows"] and row["invoice_sum"] == row["receipts_sum"]:
                     row["match"] = True
                 people[i]["dates"].append(row)
 
