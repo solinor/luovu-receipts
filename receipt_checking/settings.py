@@ -77,7 +77,11 @@ INSTALLED_APPS = [
     'receipts',
 ]
 
-MIDDLEWARE_CLASSES = [
+REDIRECT_NEW_DOMAIN = os.environ.get("REDIRECT_NEW_DOMAIN")
+REDIRECT_OLD_DOMAIN = os.environ.get("REDIRECT_OLD_DOMAIN")
+
+MIDDLEWARE = [
+    'receipts.middleware.DomainRedirectMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
