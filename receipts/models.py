@@ -32,8 +32,6 @@ class InvoiceRow(models.Model):
     cc_description = models.CharField(max_length=255)
     delivery_date = models.DateField()
     row_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    account_number = models.IntegerField(null=True, blank=True)
-
     invoice_date = models.DateField()
 
     class Meta:
@@ -70,6 +68,7 @@ class LuovuReceipt(models.Model):
     receipt_type = models.CharField(max_length=50, null=True, blank=True)
     uploader = models.CharField(max_length=255, null=True, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    account_number = models.IntegerField(null=True, blank=True)
 
     class Meta:
         ordering = ("date", "price")
