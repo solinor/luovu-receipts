@@ -60,14 +60,18 @@ def process_receipt(user_email, receipt):
     })
     LuovuPrice.objects.filter(receipt=obj).delete()
     total_price = 0
+    account_number = None
     for price in receipt["prices"]:
+        if price["account_number"] != "0":
+            account_number = price["account_number"]
         if price["price"].startswith("-"):
             continue
         parsed_price = luovu_api.format_price(price["price"])
-        price_obj = LuovuPrice(price=parsed_price, vat_percent=int(price["vat_percent"]), receipt=obj)
+        price_obj = LuovuPrice(price=parsed_price, vat_percent=int(price["vat_percent"]), receipt=obj, account_number=int(price["account_number"]))
         price_obj.save()
         total_price += parsed_price
     obj.price = total_price
+    obj.account_number = account_number
     obj.save()
 
 

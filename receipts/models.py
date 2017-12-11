@@ -32,6 +32,7 @@ class InvoiceRow(models.Model):
     cc_description = models.CharField(max_length=255)
     delivery_date = models.DateField()
     row_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    account_number = models.IntegerField(null=True, blank=True)
 
     invoice_date = models.DateField()
 
@@ -84,6 +85,7 @@ class LuovuPrice(models.Model):
     receipt = models.ForeignKey("LuovuReceipt")
     price = models.DecimalField(max_digits=10, decimal_places=2)
     vat_percent = models.IntegerField(null=True, blank=True)
+    account_number = models.IntegerField(null=True, blank=True)
 
     def __unicode__(self):
         return u"%s - %s - %s" % (self.receipt, self.price, self.vat_number)
