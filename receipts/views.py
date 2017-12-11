@@ -154,10 +154,12 @@ def people_list(request):
             continue
         intersection = dates_set.intersection(invoice_per_person[person["email"]].keys())
         tmp = []
+        valid_dates = 0
         for date in dates:
             if date not in invoice_per_person[person["email"]]:
                 people[i]["dates"].append({})
             else:
+                valid_dates += 1
                 invoice_row = invoice_per_person[person["email"]][date]
                 row = {"date": date, "match": False,
                        "invoice_rows": invoice_row["invoice_rows"],
@@ -170,7 +172,8 @@ def people_list(request):
                 if row["invoice_rows"] == row["receipt_rows"] and row["invoice_sum"] == row["receipts_sum"]:
                     row["match"] = True
                 people[i]["dates"].append(row)
-
+        if valid_dates == 0:
+            people[i]["dates"] = False
     context = {
         "people": people,
         "dates": dates,
