@@ -63,7 +63,7 @@ def process_receipt(user_email, receipt):
     account_number = None
     for price in receipt["prices"]:
         if price["account_number"] != "0":
-            account_number = price["account_number"]
+            account_number = int(price["account_number"])
         if price["price"].startswith("-"):
             continue
         parsed_price = luovu_api.format_price(price["price"])
