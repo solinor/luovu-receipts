@@ -42,6 +42,7 @@ class HtmlParser(object):
         line = line.replace(u" ", u".")
         line = line.replace(u"jaakko.santeri.raisanen", u"santeri.raisanen")
         line = line.replace(u"rolando.ojeda.montiel", u"rolando.ojeda")
+        line = line.replace(u"jouni.ensio.jaakkola", u"jouni.jaakkola")
         return line + u"@solinor.com"
 
     @classmethod
