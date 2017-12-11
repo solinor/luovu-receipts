@@ -109,74 +109,70 @@ def receipt_details(request, receipt_id):
 
 
 @login_required
-def people_list(request):
-    today = datetime.date.today().replace(day=1)
-    dates = [today]
-    dates.append(today - relativedelta(months=1))
-    dates.append(today - relativedelta(months=2))
-    dates.append(today - relativedelta(months=3))
-    dates.append(today - relativedelta(months=4))
-    dates.reverse()
-    dates_set = set(dates)
-    people = [{"email": a, "dates": []} for a in get_all_users()]
-    invoice_per_person_data = InvoiceRow.objects.values_list("card_holder_email_guess", "invoice_date").order_by("card_holder_email_guess", "invoice_date").annotate(rowcount=Count("row_identifier"))
-    receipts_per_user_data = LuovuReceipt.objects.exclude(state="deleted").exclude(account_number=1900).annotate(month=TruncMonth("date")).values_list("luovu_user", "month").order_by("luovu_user", "month").annotate(rowcount=Count("pk"))
-    cash_purchases_per_user_data = LuovuReceipt.objects.exclude(state="deleted").filter(account_number=1900).annotate(month=TruncMonth("date")).values_list("luovu_user", "month").order_by("luovu_user", "month").annotate(rowcount=Count("pk"))
+def people_list_redirect(request):
+    months = InvoiceRow.objects.values_list("invoice_date").order_by("-invoice_date").distinct("invoice_date")
+    return HttpResponseRedirect(reverse("people", args=(months[0][0].year, months[0][0].month)))
 
-    invoice_sum_per_person = InvoiceRow.objects.values_list("card_holder_email_guess", "invoice_date").order_by("card_holder_email_guess", "invoice_date").annotate(price_sum=Sum("row_price"))
-    receipts_sum_per_user = LuovuReceipt.objects.exclude(state="deleted").exclude(account_number=1900).annotate(month=TruncMonth("date")).values_list("luovu_user", "month").order_by("luovu_user", "month").annotate(price_sum=Sum("price"))
-    cash_purchases_sum_per_user = LuovuReceipt.objects.exclude(state="deleted").filter(account_number=1900).annotate(month=TruncMonth("date")).values_list("luovu_user", "month").order_by("luovu_user", "month").annotate(price_sum=Sum("price"))
 
-    def gen_daily_dict():
-        return defaultdict(int)
+@login_required
+def people_list(request, year, month):
+    year = int(year)
+    month = int(month)
+    today = datetime.date(year, month, 1)
+    people = [{"email": a, "data": defaultdict(int)} for a in get_all_users()]
+    invoice_per_person_data = InvoiceRow.objects.filter(invoice_date__year=year).filter(invoice_date__month=month).values_list("card_holder_email_guess", "invoice_date").order_by("card_holder_email_guess", "invoice_date").annotate(rowcount=Count("row_identifier"))
+    receipts_per_user_data = LuovuReceipt.objects.filter(date__year=year, date__month=month).exclude(state="deleted").exclude(account_number=1900).annotate(month=TruncMonth("date")).values_list("luovu_user", "month").order_by("luovu_user", "month").annotate(rowcount=Count("pk"))
+    cash_purchases_per_user_data = LuovuReceipt.objects.filter(date__year=year, date__month=month).exclude(state="deleted").filter(account_number=1900).annotate(month=TruncMonth("date")).values_list("luovu_user", "month").order_by("luovu_user", "month").annotate(rowcount=Count("pk"))
+
+    invoice_sum_per_person = InvoiceRow.objects.filter(invoice_date__year=year).filter(invoice_date__month=month).values_list("card_holder_email_guess", "invoice_date").order_by("card_holder_email_guess", "invoice_date").annotate(price_sum=Sum("row_price"))
+    receipts_sum_per_user = LuovuReceipt.objects.filter(date__year=year, date__month=month).exclude(state="deleted").exclude(account_number=1900).annotate(month=TruncMonth("date")).values_list("luovu_user", "month").order_by("luovu_user", "month").annotate(price_sum=Sum("price"))
+    cash_purchases_sum_per_user = LuovuReceipt.objects.filter(date__year=year, date__month=month).exclude(state="deleted").filter(account_number=1900).annotate(month=TruncMonth("date")).values_list("luovu_user", "month").order_by("luovu_user", "month").annotate(price_sum=Sum("price"))
 
     def gen_user_dict():
-        return defaultdict(gen_daily_dict)
+        return defaultdict(int)
 
     invoice_per_person = defaultdict(gen_user_dict)
 
-    for user_email, invoice_date, cnt in invoice_per_person_data:
-        invoice_per_person[user_email][invoice_date]["invoice_rows"] = cnt
-    for user_email, receipt_date, cnt in receipts_per_user_data:
-        invoice_per_person[user_email][receipt_date]["receipt_rows"] = cnt
-    for user_email, receipt_date, cnt in cash_purchases_per_user_data:
-        invoice_per_person[user_email][receipt_date]["cash_purchase_rows"] = cnt
-    for user_email, receipt_date, price_sum in invoice_sum_per_person:
-        invoice_per_person[user_email][receipt_date]["invoice_sum"] = price_sum
-    for user_email, receipt_date, price_sum in receipts_sum_per_user:
-        invoice_per_person[user_email][receipt_date]["receipts_sum"] = price_sum
-    for user_email, receipt_date, price_sum in cash_purchases_sum_per_user:
-        invoice_per_person[user_email][receipt_date]["cash_purchase_sum"] = price_sum
+    for user_email, _, cnt in invoice_per_person_data:
+        invoice_per_person[user_email]["invoice_rows"] = cnt
+    for user_email, _, cnt in receipts_per_user_data:
+        invoice_per_person[user_email]["receipt_rows"] = cnt
+    for user_email, _, cnt in cash_purchases_per_user_data:
+        invoice_per_person[user_email]["cash_purchase_rows"] = cnt
+    for user_email, _, price_sum in invoice_sum_per_person:
+        invoice_per_person[user_email]["invoice_sum"] = price_sum
+    for user_email, _, price_sum in receipts_sum_per_user:
+        invoice_per_person[user_email]["receipts_sum"] = price_sum
+    for user_email, _, price_sum in cash_purchases_sum_per_user:
+        invoice_per_person[user_email]["cash_purchase_sum"] = price_sum
 
     for i, person in enumerate(people):
         if person["email"] not in invoice_per_person:
-            people[i]["dates"] = False
+            people[i]["data"] = False
             continue
-        intersection = dates_set.intersection(invoice_per_person[person["email"]].keys())
-        tmp = []
-        valid_dates = 0
-        for date in dates:
-            if date not in invoice_per_person[person["email"]]:
-                people[i]["dates"].append({})
-            else:
-                valid_dates += 1
-                invoice_row = invoice_per_person[person["email"]][date]
-                row = {"date": date, "match": False,
-                       "invoice_rows": invoice_row["invoice_rows"],
-                       "receipt_rows": invoice_row["receipt_rows"],
-                       "cash_purchase_rows": invoice_row["cash_purchase_rows"],
-                       "invoice_sum": invoice_row["invoice_sum"],
-                       "receipts_sum": invoice_row["receipts_sum"],
-                       "cash_purchase_sum": invoice_row["cash_purchase_sum"],
-                }
-                if row["invoice_rows"] == row["receipt_rows"] and row["invoice_sum"] == row["receipts_sum"]:
-                    row["match"] = True
-                people[i]["dates"].append(row)
-        if valid_dates == 0:
-            people[i]["dates"] = False
+
+        invoice_row = invoice_per_person[person["email"]]
+        row = {
+            "sum_match": False,
+            "count_match": False,
+            "invoice_rows": invoice_row["invoice_rows"],
+            "receipt_rows": invoice_row["receipt_rows"],
+            "cash_purchase_rows": invoice_row["cash_purchase_rows"],
+            "invoice_sum": invoice_row["invoice_sum"],
+            "receipts_sum": invoice_row["receipts_sum"],
+            "cash_purchase_sum": invoice_row["cash_purchase_sum"],
+        }
+        if row["invoice_rows"] == row["receipt_rows"]:
+            row["count_match"] = True
+        if row["invoice_sum"] == row["receipts_sum"]:
+            row["sum_match"] = True
+        people[i]["data"] = row
+
+    months = InvoiceRow.objects.values_list("invoice_date").order_by("-invoice_date").distinct("invoice_date")
     context = {
         "people": people,
-        "dates": dates,
+        "months": months,
+        "today": today,
     }
     return render(request, "people.html", context)
 
@@ -232,5 +228,14 @@ def person_details(request, user_email, year, month):
 
     previous_months = InvoiceRow.objects.filter(card_holder_email_guess=user_email).values_list("invoice_date").order_by("-invoice_date").distinct("invoice_date")
 
-    context = {"table": table, "user_email": user_email, "start_date": start_date, "end_date": end_date, "previous_months": previous_months, "year": year, "month": month, "invoice_total": sum([invoice.row_price for invoice in user_invoice]), "receipts_total": sum([receipt.price for receipt in user_receipts])}
+    context = {
+        "table": table,
+        "user_email": user_email,
+        "start_date": start_date,
+        "end_date": end_date,
+        "previous_months": previous_months,
+        "year": year,
+        "month": month,
+        "invoice_total": sum([invoice.row_price for invoice in user_invoice]), "receipts_total": sum([receipt.price for receipt in user_receipts]),
+    }
     return render(request, "person_details.html", context)

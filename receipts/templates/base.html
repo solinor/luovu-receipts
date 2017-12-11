@@ -33,7 +33,7 @@
         <ul class="nav navbar-nav">
           {% if request.user.is_authenticated %}
           <li><a href="{% url "frontpage" %}">Home</a></li>
-          <li><a href="{% url "people" %}">People</a></li>
+          <li><a href="{% url "people_list_redirect" %}">People</a></li>
           {% endif %}
           {% block navbar_items %}{% endblock %}
         </ul>

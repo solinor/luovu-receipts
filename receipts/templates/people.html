@@ -11,11 +11,13 @@
   background-color: #ffdada;
 }
 .table a {
-  display:block;
   text-decoration:none;
 }
 .table .clickable-cell {
   cursor: pointer;
+}
+.number-column {
+  text-align: right;
 }
 </style>
 {% endblock %}
@@ -29,29 +31,53 @@
 
 <h1>People</h1>
 
-<table class="table">
+{% if months %}
+<div class="dropdown" style="display: inline-block">
+  <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+    Change month
+    <span class="caret"></span>
+  </button>
+  <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+    {% for previous_month in months %}
+    <li><a href="{% url "people" previous_month.0.year previous_month.0.month %}">{{ previous_month.0|date:"Y-m" }}</a></li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+<table class="table table-hover">
   <thead>
     <tr>
-      <th></th>
-      {% for date in dates %}
-      <th>{{ date|date:"Y-m" }}</th>
-      {% endfor %}
+      <th>Email</th>
+      <th class="number-column">Receipts &euro;</th>
+      <th class="number-column">Invoices &euro;</th>
+      <th class="number-column">Receipts #</th>
+      <th class="number-column">Invoices #</th>
+      <th class="number-column">Cash &euro;</th>
+      <th class="number-column">Cash #</th>
     </tr>
   </thead>
   <tbody>
     {% for person in people %}
-    {% if person.dates and person.email %}
-    <tr>
-      <td>{{ person.email }}</td>
-      {% for date in person.dates %}
-      <td {% if date.date %} onclick="window.location='{% url 'person' person.email date.date.year date.date.month %}';"{% endif %} class="{% if date.date %}clickable-cell {% if date.match %}matching-row{% else %}non-matching-row{% endif %}{% endif %}">{% if date.date %}<a href="{% url 'person' person.email date.date.year date.date.month %}"><span class="label label-primary"><span class="glyphicon glyphicon-credit-card" aria-hidden="true"></span> {{ date.receipt_rows }} out of {{ date.invoice_rows }}</span> {% if date.cash_purchase_rows > 0 %} + <span class="label label-success">{{ date.cash_purchase_rows }}</span>{% endif %}<br>
-      {% if date.receipts_sum == date.invoice_sum %}{{ date.receipts_sum|floatformat:"0" }}&euro;{% else %}{{ date.receipts_sum|floatformat:"0" }}&euro; out of {{ date.invoice_sum|floatformat:"0" }}&euro;{% endif %}{% if date.cash_purchase_sum > 0 %} + {{ date.cash_purchase_sum|floatformat:"0" }}&euro; in cash purchases{% endif %}
-      </a>{% endif %}</td>
-      {% endfor %}
+    {% if person.email and person.data %}
+    <tr onclick="window.location='{% url 'person' person.email today.year today.month %}'" class="clickable-cell">
+      <td><a href="{% url 'person' person.email today.year today.month %}">{{ person.email }}</a></td>
+      <td class="number-column {% if person.data.sum_match %}matching-row{% else %}non-matching-row{% endif %}">{% if person.data.receipts_sum %}{{ person.data.receipts_sum|floatformat:2 }}{% endif %}</td>
+      <td class="number-column {% if person.data.sum_match %}matching-row{% else %}non-matching-row{% endif %}">{% if person.data.invoice_sum %}{{ person.data.invoice_sum|floatformat:2 }}{% endif %}</td>
+      <td class="number-column {% if person.data.count_match %}matching-row{% else %}non-matching-row{% endif %}">{% if person.data.receipt_rows %}{{ person.data.receipt_rows }}{% endif %}</td>
+      <td class="number-column {% if person.data.count_match %}matching-row{% else %}non-matching-row{% endif %}">{% if person.data.invoice_rows > 0 %}{{ person.data.invoice_rows }}{% endif %}</td>
+      <td class="number-column">{% if person.data.cash_purchase_sum > 0 %}{{ person.data.cash_purchase_sum }}{% endif %}</td>
+      <td class="number-column">{% if person.data.cash_purchase_rows > 0 %}{{ person.data.cash_purchase_rows }}{% endif %}</td>
     </tr>
     {% endif %}
     {% endfor %}
   </tbody>
 </table>
-
+{% comment %}
+{% for date in person.dates %}
+<td {% if date.date %} onclick="window.location='{% url 'person' person.email date.date.year date.date.month %}';"{% endif %} class="{% if date.date %}clickable-cell {% if date.match %}matching-row{% else %}non-matching-row{% endif %}{% endif %}">{% if date.date %}<a href="{% url 'person' person.email date.date.year date.date.month %}"><span class="label label-primary"><span class="glyphicon glyphicon-credit-card" aria-hidden="true"></span> {{ date.receipt_rows }} out of {{ date.invoice_rows }}</span> {% if date.cash_purchase_rows > 0 %} + <span class="label label-success">{{ date.cash_purchase_rows }}</span>{% endif %}<br>
+{% if date.receipts_sum == date.invoice_sum %}{{ date.receipts_sum|floatformat:"0" }}&euro;{% else %}{{ date.receipts_sum|floatformat:"0" }}&euro; out of {{ date.invoice_sum|floatformat:"0" }}&euro;{% endif %}{% if date.cash_purchase_sum > 0 %} + {{ date.cash_purchase_sum|floatformat:"0" }}&euro; in cash purchases{% endif %}
+</a>{% endif %}</td>
+{% endfor %}
+{% endcomment %}
 {% endblock %}
