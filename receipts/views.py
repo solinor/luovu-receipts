@@ -113,11 +113,13 @@ def people_list(request):
     dates.append(today - relativedelta(months=1))
     dates.append(today - relativedelta(months=2))
     dates.append(today - relativedelta(months=3))
+    dates.append(today - relativedelta(months=4))
     dates.reverse()
     dates_set = set(dates)
     people = [{"email": a, "dates": []} for a in get_all_users()]
     invoice_per_person_data = InvoiceRow.objects.values_list("card_holder_email_guess", "invoice_date").order_by("card_holder_email_guess", "invoice_date").annotate(rowcount=Count("row_identifier"))
-    receipts_per_user_data = LuovuReceipt.objects.exclude(state="deleted").annotate(month=TruncMonth("date")).values_list("luovu_user", "month").order_by("luovu_user", "month").annotate(rowcount=Count("pk"))
+    receipts_per_user_data = LuovuReceipt.objects.exclude(state="deleted").exclude(account_number=1900).annotate(month=TruncMonth("date")).values_list("luovu_user", "month").order_by("luovu_user", "month").annotate(rowcount=Count("pk"))
+    cash_purchases_per_user_data = LuovuReceipt.objects.exclude(state="deleted").filter(account_number=1900).annotate(month=TruncMonth("date")).values_list("luovu_user", "month").order_by("luovu_user", "month").annotate(rowcount=Count("pk"))
     invoice_per_person = {}
     for user_email, invoice_date, cnt in invoice_per_person_data:
         if user_email not in invoice_per_person:
@@ -129,6 +131,12 @@ def people_list(request):
         if receipt_date not in invoice_per_person[user_email]:
             invoice_per_person[user_email][receipt_date] = {"invoice_rows": 0}
         invoice_per_person[user_email][receipt_date]["receipt_rows"] = cnt
+    for user_email, receipt_date, cnt in cash_purchases_per_user_data:
+        if user_email not in invoice_per_person:
+            invoice_per_person[user_email] = {}
+        if receipt_date not in invoice_per_person[user_email]:
+            invoice_per_person[user_email][receipt_date] = {"invoice_rows": 0}
+        invoice_per_person[user_email][receipt_date]["cash_purchase_rows"] = cnt
 
     for i, person in enumerate(people):
         if person["email"] not in invoice_per_person:
@@ -140,7 +148,7 @@ def people_list(request):
             if date not in invoice_per_person[person["email"]]:
                 people[i]["dates"].append({})
             else:
-                row = {"date": date, "match": False, "invoice_rows": invoice_per_person[person["email"]][date].get("invoice_rows", 0), "receipt_rows": invoice_per_person[person["email"]][date].get("receipt_rows", 0)}
+                row = {"date": date, "match": False, "invoice_rows": invoice_per_person[person["email"]][date].get("invoice_rows", 0), "receipt_rows": invoice_per_person[person["email"]][date].get("receipt_rows", 0), "cash_purchase_rows": invoice_per_person[person["email"]][date].get("cash_purchase_rows", 0)}
                 if row["invoice_rows"] == row["receipt_rows"]:
                     row["match"] = True
                 people[i]["dates"].append(row)
