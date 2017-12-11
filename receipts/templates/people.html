@@ -25,7 +25,7 @@
 <table class="table">
   <tbody>
     {% for person in people %}
-    {% if person.dates %}
+    {% if person.dates and person.email %}
     <tr>
       <td>{{ person.email }}</td>
       {% for date in person.dates %}
