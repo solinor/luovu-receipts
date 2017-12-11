@@ -42,8 +42,8 @@ class InvoiceRow(models.Model):
 
 
 class InvoiceReceipt(models.Model):
-    invoice_row = models.ForeignKey("InvoiceRow")
-    luovu_receipt = models.ForeignKey("LuovuReceipt")
+    invoice_row = models.ForeignKey("InvoiceRow", on_delete=models.CASCADE)
+    luovu_receipt = models.ForeignKey("LuovuReceipt", on_delete=models.CASCADE)
     linked_by_user = models.CharField(max_length=255, null=True, blank=True)
     confirmed_by = models.CharField(max_length=255, null=True, blank=True)
     linked_at = models.DateTimeField()
@@ -81,7 +81,7 @@ class LuovuReceipt(models.Model):
 
 
 class LuovuPrice(models.Model):
-    receipt = models.ForeignKey("LuovuReceipt")
+    receipt = models.ForeignKey("LuovuReceipt", on_delete=models.CASCADE)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     vat_percent = models.IntegerField(null=True, blank=True)
     account_number = models.IntegerField(null=True, blank=True)
