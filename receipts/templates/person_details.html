@@ -19,6 +19,11 @@
   background-color: #fff5f5;
 }
 </style>
+<script>
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+</script>
 {% endblock %}
 
 {% block content %}
@@ -86,7 +91,8 @@
         <td></td>
       {% endif %}
       {% if row.items.2 %}
-      <td class="vertical-separator"><a href="{% url 'receipt' row.items.2.luovu_id %}">{% if row.items.2.has_description %}{{ row.items.2.description }}{% else %}[no description]{% endif %}</a></td>
+      <td class="vertical-separator"><a href="{% url 'receipt' row.items.2.luovu_id %}">{% if row.items.2.has_description %}{{ row.items.2.description }}{% else %}[no description]{% endif %}</a>{% if row.items.2.autodetected_language == "fi" %} <span class="glyphicon glyphicon-exclamation-sign" data-toggle="tooltip" data-placement="right" title="This seems to be in Finnish. English is highly preferred." aria-hidden="true"></span>
+{% endif %}</td>
       <td class="price">{{ row.items.2.price }}&euro;</td>
       <td><a href="{% url "redirect_to_luovu" user_email row.items.2.luovu_id %}">Luovu</td>
       {% else %}
