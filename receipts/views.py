@@ -148,6 +148,14 @@ def people_list(request, year, month):
     for user_email, _, price_sum in cash_purchases_sum_per_user:
         invoice_per_person[user_email]["cash_purchase_sum"] = price_sum
 
+    summary_row = {
+        "invoice_sum": 0,
+        "receipts_sum": 0,
+        "receipts_count": 0,
+        "invoice_count": 0,
+        "cash_purchase_count": 0,
+        "cash_purchase_sum": 0,
+    }
     for i, person in enumerate(people):
         if person["email"] not in invoice_per_person:
             people[i]["data"] = False
@@ -170,12 +178,19 @@ def people_list(request, year, month):
         if row["invoice_sum"] == row["receipts_sum"]:
             row["sum_match"] = True
         people[i]["data"] = row
+        summary_row["invoice_sum"] += invoice_row["invoice_sum"]
+        summary_row["receipts_sum"] += invoice_row["receipts_sum"]
+        summary_row["receipts_count"] += invoice_row["receipt_rows"]
+        summary_row["invoice_count"] += invoice_row["invoice_rows"]
+        summary_row["cash_purchase_sum"] += invoice_row["cash_purchase_sum"]
+        summary_row["cash_purchase_count"] += invoice_row["cash_purchase_rows"]
 
     months = InvoiceRow.objects.values_list("invoice_date").order_by("-invoice_date").distinct("invoice_date")
     context = {
         "people": people,
         "months": months,
         "today": today,
+        "summary_row": summary_row
     }
     return render(request, "people.html", context)
 

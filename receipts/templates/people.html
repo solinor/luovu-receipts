@@ -74,6 +74,18 @@
     {% endif %}
     {% endfor %}
   </tbody>
+  <tfoot>
+    <tr>
+      <th>&Sigma;</th>
+      <th class="number-column">{{ summary_row.receipts_sum }}</th>
+      <th class="number-column">{{ summary_row.invoice_sum }}</th>
+      <th class="number-column">{{ summary_row.receipts_count }}</th>
+      <th class="number-column">{{ summary_row.invoice_count }}</th>
+      <th></th>
+      <th class="number-column">{{ summary_row.cash_purchase_sum }}</th>
+      <th class="number-column">{{ summary_row.cash_purchase_count }}</th>
+    </tr>
+  </tfoot>
 </table>
 {% comment %}
 {% for date in person.dates %}
