@@ -6,14 +6,18 @@
 <h3>Invoice rows</h3>
 <ul>
   {% for result in invoices %}
-  <li><a href="{% url "person" result.card_holder_email_guess result.invoice_date.year result.invoice_date.month %}">{{ result.delivery_date }} - {{ result.description }} - {{ result.row_price }}&euro; - {{ result.card_holder_email_guess }}</a></li>
+  {% if result.card_holder_email_guess %}
+  <li><a href="{% url "person" result.card_holder_email_guess result.invoice_date.year result.invoice_date.month %}">{{ result.delivery_date }} - {{ result.description }} - {{ result.row_price }}&euro; - {{ result.card_holder_email_guess }}</a> {{ result.similarity }}</li>
+  {% endif %}
   {% endfor %}
 </ul>
 
 <h3>Receipts</h3>
 <ul>
   {% for result in receipts %}
-  <li>{{ result.date }} - <a href="{% url "receipt_image" result.pk %}">{{ result.description }} - {{ result.price }}&euro;</a> - <a href="{% url "person" result.luovu_user result.date.year result.date.month %}">{{ result.luovu_user }}</a></li>
+  {% if result.luovu_user %}
+  <li>{{ result.date }} - <a href="{% url "receipt_image" result.pk %}">{{ result.description }} - {{ result.price }}&euro;</a> - <a href="{% url "person" result.luovu_user result.date.year result.date.month %}">{{ result.luovu_user }}</a> {{ result.similarity }}</li>
+  {% endif %}
   {% endfor %}
 </ul>
 
