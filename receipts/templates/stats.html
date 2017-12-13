@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block header %}
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script>
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+google.charts.load('current', {'packages':['bar']});
+google.charts.setOnLoadCallback(drawChart);
+function drawChart() {
+  var data = google.visualization.arrayToDataTable([
+    ['Month', 'Purchases', 'Receipts', 'Cash purchases'],
+    {% for row in per_month %}
+    ['{{ row.0|date:"Y-m" }}', {{ row.1 }}, {{ row.2 }}, {{ row.3 }}]{% if not forloop.last %},{% endif %}
+    {% endfor %}
+  ]);
+
+  var options = {
+    chart: {
+      title: 'Credit card usage',
+    }
+  };
+
+  var chart = new google.charts.Bar(document.getElementById('cc_usage_chart'));
+
+
+  chart.draw(data, google.charts.Bar.convertOptions(options));
+
+  var data = google.visualization.arrayToDataTable([
+    ['Price', 'Entries'],
+    {% for row in count_histogram %}
+    ['<{{ row.0 }}', {{ row.1 }}]{% if not forloop.last %},{% endif %}
+    {% endfor %}
+  ]);
+
+  var options = {
+    chart: {
+      title: 'Entries per price bucket during past 12 months',
+    }
+  };
+
+  var chart = new google.charts.Bar(document.getElementById('count_histogram_chart'));
+
+  chart.draw(data, google.charts.Bar.convertOptions(options));
+
+  var data = google.visualization.arrayToDataTable([
+    ['Price', 'Entries'],
+    {% for row in sum_histogram %}
+    ['<{{ row.0 }}', {{ row.1 }}]{% if not forloop.last %},{% endif %}
+    {% endfor %}
+  ]);
+
+  var options = {
+    chart: {
+      title: 'Money used per price bucket during past 12 months',
+    }
+  };
+
+  var chart = new google.charts.Bar(document.getElementById('sum_histogram_chart'));
+
+  chart.draw(data, google.charts.Bar.convertOptions(options));
+}
+
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="cc_usage_chart" style="width: 100%; height: 500px;"></div>
+<div id="count_histogram_chart" style="width: 100%; height: 500px;"></div>
+<div id="sum_histogram_chart" style="width: 100%; height: 500px;"></div>
+
+{% endblock %}

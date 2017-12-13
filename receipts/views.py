@@ -261,7 +261,6 @@ def person_details(request, user_email, year, month):
     previous_months = InvoiceRow.objects.filter(card_holder_email_guess=user_email).values_list("invoice_date").order_by("-invoice_date").distinct("invoice_date")
 
     monthly_invoice_sum = InvoiceRow.objects.filter(card_holder_email_guess=user_email).annotate(month=TruncMonth("delivery_date")).order_by("month").values("month").annotate(price=Sum("row_price")).values("month", "price")
-
     monthly_cash_purchases_sum = LuovuReceipt.objects.filter(luovu_user=user_email).exclude(state="deleted").filter(account_number=1900).annotate(month=TruncMonth("date")).order_by("month").values("month").annotate(price=Sum("price")).values("month", "price")
     monthly_receipts_sum = LuovuReceipt.objects.filter(luovu_user=user_email).exclude(state="deleted").exclude(account_number=1900).annotate(month=TruncMonth("date")).order_by("month").values("month").annotate(price=Sum("price")).values("month", "price")
 
@@ -299,3 +298,56 @@ def person_details(request, user_email, year, month):
         "invoice_total": sum([invoice.row_price for invoice in user_invoice]), "receipts_total": sum([receipt.price for receipt in user_receipts]),
     }
     return render(request, "person_details.html", context)
+
+
+@login_required
+def stats(request):
+    today = datetime.date.today()
+    current_month = today.replace(year=today.year - 1, day=1)
+
+    monthly_invoice_sum = InvoiceRow.objects.filter(delivery_date__gte=current_month).annotate(month=TruncMonth("delivery_date")).order_by("month").values("month").annotate(price=Sum("row_price")).values("month", "price")
+    monthly_cash_purchases_sum = LuovuReceipt.objects.exclude(state="deleted").filter(account_number=1900).filter(date__gte=current_month).annotate(month=TruncMonth("date")).order_by("month").values("month").annotate(price=Sum("price")).values("month", "price")
+    monthly_receipts_sum = LuovuReceipt.objects.exclude(state="deleted").exclude(account_number=1900).filter(date__gte=current_month).annotate(month=TruncMonth("date")).order_by("month").values("month").annotate(price=Sum("price")).values("month", "price")
+
+    months = []
+    while current_month < today:
+        months.append(current_month)
+        if current_month.month == 12:
+            current_month = current_month.replace(year=current_month.year + 1, month=1)
+        else:
+            current_month = current_month.replace(month=current_month.month + 1)
+    chart_data = {k: [k, 0, 0, 0] for k in months}
+
+    for row in monthly_invoice_sum:
+        if row["month"] in chart_data:
+            chart_data[row["month"]][1] = row["price"]
+    for row in monthly_receipts_sum:
+        if row["month"] in chart_data:
+            chart_data[row["month"]][2] = row["price"]
+    for row in monthly_cash_purchases_sum:
+        if row["month"] in chart_data:
+            chart_data[row["month"]][3] = row["price"]
+    chart_data = sorted(chart_data.values(), key=lambda k: k[0])
+
+
+    prices = InvoiceRow.objects.filter(row_price__gt=0).values_list("row_price")
+    histogram_slots = (5, 10, 15, 20, 25, 50, 100, 250, 500, 750, 1000, 2000, 4000, 8000, 16000)
+    count_histogram = {k: 0 for k in histogram_slots}
+    sum_histogram = {k: 0 for k in histogram_slots}
+
+    for price, in prices:
+        for k in histogram_slots:
+            if price < k:
+                count_histogram[k] += 1
+                sum_histogram[k] += price
+                break
+        else:
+            count_histogram[histogram_slots[-1]] += 1
+            sum_histogram[histogram_slots[-1]] += price
+
+    context = {
+        "per_month": chart_data,
+        "count_histogram": [i for i in sorted(count_histogram.items(), key=lambda k: k[0])],
+        "sum_histogram": [i for i in sorted(sum_histogram.items(), key=lambda k: k[0])],
+    }
+    return render(request, "stats.html", context)
