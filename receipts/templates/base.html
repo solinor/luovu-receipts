@@ -37,6 +37,9 @@
           {% endif %}
           {% block navbar_items %}{% endblock %}
         </ul>
+        <form class="navbar-form navbar-right" action="{% url 'search' %}" method="get">
+          <input type="text" class="form-control" placeholder="Search..." name="q">
+        </form>
         {% if request.user.is_staff %}
         <ul class="nav navbar-nav pull-right">
           <li class="dropdown">

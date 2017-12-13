@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Search: {{ keyword }}</h1>
+
+<h3>Invoice rows</h3>
+<ul>
+  {% for result in invoices %}
+  <li><a href="{% url "person" result.card_holder_email_guess result.invoice_date.year result.invoice_date.month %}">{{ result.delivery_date }} - {{ result.description }} - {{ result.row_price }}&euro; - {{ result.card_holder_email_guess }}</a></li>
+  {% endfor %}
+</ul>
+
+<h3>Receipts</h3>
+<ul>
+  {% for result in receipts %}
+  <li>{{ result.date }} - <a href="{% url "receipt_image" result.pk %}">{{ result.description }} - {{ result.price }}&euro;</a> - <a href="{% url "person" result.luovu_user result.date.year result.date.month %}">{{ result.luovu_user }}</a></li>
+  {% endfor %}
+</ul>
+
+{% endblock %}

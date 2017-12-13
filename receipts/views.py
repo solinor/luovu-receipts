@@ -199,6 +199,16 @@ def upload_invoice_html(request):
     return render(request, "import.html", {"form": form})
 
 
+@login_required
+def search(request):
+    keyword = request.GET.get("q")
+    if not keyword:
+        return HttpResponseRedirect(reverse("frontpage"))
+    invoices = InvoiceRow.objects.filter(description__icontains=keyword).order_by("-delivery_date")
+    receipts = LuovuReceipt.objects.filter(description__icontains=keyword).order_by("-date")
+    return render(request, "search.html", {"keyword": keyword, "invoices": invoices, "receipts": receipts})
+
+
 invoice_tuple = namedtuple("InvoiceRowTuple", ["row_identifier", "description", "row_price", "account_number", "delivery_date"])
 
 
