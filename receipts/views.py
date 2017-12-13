@@ -245,6 +245,33 @@ def person_details(request, user_email, year, month):
 
     previous_months = InvoiceRow.objects.filter(card_holder_email_guess=user_email).values_list("invoice_date").order_by("-invoice_date").distinct("invoice_date")
 
+    monthly_invoice_sum = InvoiceRow.objects.filter(card_holder_email_guess=user_email).annotate(month=TruncMonth("delivery_date")).order_by("month").values("month").annotate(price=Sum("row_price")).values("month", "price")
+
+    monthly_cash_purchases_sum = LuovuReceipt.objects.filter(luovu_user=user_email).exclude(state="deleted").filter(account_number=1900).annotate(month=TruncMonth("date")).order_by("month").values("month").annotate(price=Sum("price")).values("month", "price")
+    monthly_receipts_sum = LuovuReceipt.objects.filter(luovu_user=user_email).exclude(state="deleted").exclude(account_number=1900).annotate(month=TruncMonth("date")).order_by("month").values("month").annotate(price=Sum("price")).values("month", "price")
+
+    today = datetime.date.today()
+    current_month = today.replace(year=today.year - 1, day=1)
+    months = []
+    while current_month < today:
+        months.append(current_month)
+        if current_month.month == 12:
+            current_month = current_month.replace(year=current_month.year + 1, month=1)
+        else:
+            current_month = current_month.replace(month=current_month.month + 1)
+    chart_data = {k: [k, 0, 0, 0] for k in months}
+
+    for row in monthly_invoice_sum:
+        if row["month"] in chart_data:
+            chart_data[row["month"]][1] = row["price"]
+    for row in monthly_receipts_sum:
+        if row["month"] in chart_data:
+            chart_data[row["month"]][2] = row["price"]
+    for row in monthly_cash_purchases_sum:
+        if row["month"] in chart_data:
+            chart_data[row["month"]][3] = row["price"]
+    chart_data = sorted(chart_data.values(), key=lambda k: k[0])
+
     context = {
         "table": table,
         "user_email": user_email,
@@ -253,6 +280,7 @@ def person_details(request, user_email, year, month):
         "previous_months": previous_months,
         "year": year,
         "month": month,
+        "chart_data": chart_data,
         "invoice_total": sum([invoice.row_price for invoice in user_invoice]), "receipts_total": sum([receipt.price for receipt in user_receipts]),
     }
     return render(request, "person_details.html", context)
