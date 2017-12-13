@@ -37,7 +37,7 @@ class InvoiceRow(models.Model):
     class Meta:
         ordering = ("delivery_date", "row_price")
 
-    def __unicode__(self):
+    def __str__(self):
         return u"%s - %s - %s" % (self.row_identifier, self.card_holder, self.row_price)
 
 
@@ -49,7 +49,7 @@ class InvoiceReceipt(models.Model):
     linked_at = models.DateTimeField()
     confirmed_at = models.DateTimeField(null=True, blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return u"%s -> %s" % (self.invoice_row, self.luovu_receipt)
 
 
@@ -73,7 +73,7 @@ class LuovuReceipt(models.Model):
     class Meta:
         ordering = ("date", "price")
 
-    def __unicode__(self):
+    def __str__(self):
         return u"%s: %s - %s, %s" % (self.luovu_id, self.luovu_user, self.description, self.price)
 
     def has_description(self):

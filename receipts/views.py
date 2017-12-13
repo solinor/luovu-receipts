@@ -31,26 +31,21 @@ def parse_date(date_string):
 def create_receipts_table(sorted_table):
     table = []
     for date, content in sorted_table:
-        date_added = False
+        receipt_rows = defaultdict(list)
+        for item in content["receipt_rows"]:
+            receipt_rows[item.price].append(item)
         invoice_rows = sorted(content["invoice_rows"], key=lambda x: x.row_price)
-        receipt_rows = sorted(content["receipt_rows"], key=lambda x: x.price)
-        for i in range(max(len(invoice_rows), len(receipt_rows))):
-            row = {"matching": False, "items": []}
-            row["items"].append(date)
-            if i < len(invoice_rows):
-                row["items"].append(invoice_rows[i])
+        for item in invoice_rows:
+            if len(receipt_rows[item.row_price]):
+                receipt = receipt_rows[item.row_price].pop()
+                row = {"matching": True, "items": [date, item, receipt]}
             else:
-                row["items"].append(None)
-            if i < len(receipt_rows):
-                row["items"].append(receipt_rows[i])
-            else:
-                row["items"].append(None)
-
-            if row["items"][1] and row["items"][2]:
-                if row["items"][1].row_price == row["items"][2].price:
-                    row["matching"] = True
-
+                row = {"matching": False, "items": [date, item, None]}
             table.append(row)
+        for item in receipt_rows.values():
+            for receipt in item:
+                row = {"matching": False, "items": [date, None, receipt]}
+                table.append(row)
     return table
 
 
