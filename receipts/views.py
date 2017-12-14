@@ -268,7 +268,7 @@ def person_details(request, user_email, year, month):
         "chart_data": chart_data,
         "invoice_total": sum([invoice.row_price for invoice in user_invoice]), "receipts_total": sum([receipt.price for receipt in user_receipts]),
     }
-    return render(request, "person_details.html", context)
+    return render(request, "person.html", context)
 
 
 @login_required
