@@ -1,6 +1,9 @@
 from __future__ import unicode_literals
+from collections import namedtuple
 
 from django.db import models
+
+invoice_tuple = namedtuple("InvoiceRowTuple", ["row_identifier", "description", "row_price", "account_number", "delivery_date"])
 
 
 class CcUser(models.Model):

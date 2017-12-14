@@ -1,4 +1,5 @@
 import datetime
+from collections import defaultdict
 
 from receipts.models import LuovuReceipt, LuovuPrice, InvoiceRow
 from receipts.luovu_api import LuovuApi
@@ -7,6 +8,27 @@ from django.conf import settings
 
 luovu_api = LuovuApi(settings.LUOVU_BUSINESS_ID, settings.LUOVU_PARTNER_TOKEN)  # pylint:disable=invalid-name
 luovu_api.authenticate(settings.LUOVU_USERNAME, settings.LUOVU_PASSWORD)
+
+
+def create_receipts_table(sorted_table):
+    table = []
+    for date, content in sorted_table:
+        receipt_rows = defaultdict(list)
+        for item in content["receipt_rows"]:
+            receipt_rows[item.price].append(item)
+        invoice_rows = sorted(content["invoice_rows"], key=lambda x: x.row_price)
+        for item in invoice_rows:
+            if len(receipt_rows[item.row_price]):
+                receipt = receipt_rows[item.row_price].pop()
+                row = {"matching": True, "items": [date, item, receipt]}
+            else:
+                row = {"matching": False, "items": [date, item, None]}
+            table.append(row)
+        for item in receipt_rows.values():
+            for receipt in item:
+                row = {"matching": False, "items": [date, None, receipt]}
+                table.append(row)
+    return table
 
 
 def check_data_refresh(request):

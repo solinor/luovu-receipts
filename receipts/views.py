@@ -1,7 +1,7 @@
 import base64
 import calendar
 import datetime
-from collections import namedtuple, defaultdict
+from collections import defaultdict
 
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
@@ -16,8 +16,8 @@ from django.urls import reverse
 from receipts.forms import UploadFileForm
 from receipts.html_parser import HtmlParser
 from receipts.luovu_api import LuovuApi
-from receipts.models import LuovuReceipt, InvoiceRow
-from receipts.utils import get_all_users, refresh_receipts_for_user, get_latest_month_for_user, check_data_refresh
+from receipts.models import LuovuReceipt, InvoiceRow, invoice_tuple
+from receipts.utils import get_all_users, refresh_receipts_for_user, get_latest_month_for_user, check_data_refresh, create_receipts_table
 import langdetect
 
 luovu_api = LuovuApi(settings.LUOVU_BUSINESS_ID, settings.LUOVU_PARTNER_TOKEN)  # pylint:disable=invalid-name
@@ -26,27 +26,6 @@ luovu_api.authenticate(settings.LUOVU_USERNAME, settings.LUOVU_PASSWORD)
 
 def parse_date(date_string):
     return datetime.datetime.strptime(date_string, "%Y-%m-%d").date()
-
-
-def create_receipts_table(sorted_table):
-    table = []
-    for date, content in sorted_table:
-        receipt_rows = defaultdict(list)
-        for item in content["receipt_rows"]:
-            receipt_rows[item.price].append(item)
-        invoice_rows = sorted(content["invoice_rows"], key=lambda x: x.row_price)
-        for item in invoice_rows:
-            if len(receipt_rows[item.row_price]):
-                receipt = receipt_rows[item.row_price].pop()
-                row = {"matching": True, "items": [date, item, receipt]}
-            else:
-                row = {"matching": False, "items": [date, item, None]}
-            table.append(row)
-        for item in receipt_rows.values():
-            for receipt in item:
-                row = {"matching": False, "items": [date, None, receipt]}
-                table.append(row)
-    return table
 
 
 @login_required
@@ -217,9 +196,6 @@ def search(request):
     invoices = InvoiceRow.objects.filter(description__icontains=keyword).order_by("-delivery_date")
     receipts = LuovuReceipt.objects.filter(description__icontains=keyword).order_by("-date")
     return render(request, "search.html", {"keyword": keyword, "invoices": invoices, "receipts": receipts})
-
-
-invoice_tuple = namedtuple("InvoiceRowTuple", ["row_identifier", "description", "row_price", "account_number", "delivery_date"])
 
 
 @login_required
