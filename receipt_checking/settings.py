@@ -75,6 +75,7 @@ INSTALLED_APPS = [
     'googleauth',
     'django.contrib.staticfiles',
     'receipts',
+    'raven.contrib.django.raven_compat',
 ]
 
 REDIRECT_NEW_DOMAIN = os.environ.get("REDIRECT_NEW_DOMAIN")
