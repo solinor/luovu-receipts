@@ -13,11 +13,12 @@ from django.db.models.functions import TruncMonth, TruncYear, Length
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError, HttpResponseBadRequest
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
-from receipts.forms import UploadFileForm
+from receipts.forms import UploadFileForm, SlackNotificationForm
 from receipts.html_parser import HtmlParser
 from receipts.luovu_api import LuovuApi
 from receipts.models import LuovuReceipt, InvoiceRow, invoice_tuple
 from receipts.utils import get_all_users, refresh_receipts_for_user, get_latest_month_for_user, check_data_refresh, create_receipts_table
+from receipts.slack import send_notifications
 import langdetect
 
 luovu_api = LuovuApi(settings.LUOVU_BUSINESS_ID, settings.LUOVU_PARTNER_TOKEN)  # pylint:disable=invalid-name
@@ -170,6 +171,19 @@ def people_list(request, year, month):
 
 
 @staff_member_required
+def send_slack_notifications(request):
+    context = {}
+    if request.method == "POST":
+        form = SlackNotificationForm(request.POST)
+        if form.is_valid():
+            context["slack_notifications"] = send_notifications(form.cleaned_data["year"], form.cleaned_data["month"], form.cleaned_data["dry_run"])
+    else:
+        form = SlackNotificationForm()
+    context["form"] = form
+    return render(request, "slack.html", context)
+
+
+@staff_member_required
 def upload_invoice_html(request):
     if request.method == "POST":
         form = UploadFileForm(request.POST, request.FILES)
@@ -182,6 +196,9 @@ def upload_invoice_html(request):
                 InvoiceRow.objects.update_or_create(row_identifier=invoice["row_identifier"], defaults=invoice)
 
             messages.add_message(request, messages.INFO, "File imported for %s-%s" % (form.cleaned_data["year"], form.cleaned_data["month"]))
+            if form.cleaned_data["send_slack_notifications"]:
+                slack_notifications = send_notifications(form.cleaned_data["year"], form.cleaned_data["month"])
+                messages.add_message(request, messages.INFO, "Sent %s Slack notifications" % len(slack_notifications))
             return HttpResponseRedirect(reverse("frontpage"))
     else:
         form = UploadFileForm()

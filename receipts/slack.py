@@ -21,9 +21,10 @@ def refresh_slack_users():
             "slack_id": member.get("id"),
         })
 
-def send_notifications(year, month):
+def send_notifications(year, month, dry_run=False):
     martiska = CcUser.objects.get(email="martiska.reinikka@solinor.com")
     users = InvoiceRow.objects.filter(invoice_date__year=year, invoice_date__month=month).values_list("card_holder_email_guess").order_by("card_holder_email_guess").distinct("card_holder_email_guess")
+    messages = []
     for user_email, in users:  # unpack tuples
         user_invoice_rows_count = InvoiceRow.objects.filter(invoice_date__year=year, invoice_date__month=month).filter(card_holder_email_guess=user_email).count()
         user_receipts = LuovuReceipt.objects.exclude(state="deleted").filter(luovu_user=user_email).filter(date__year=year, date__month=month)
@@ -50,6 +51,12 @@ It seems you have work to do with your credit card receipts:
             if not user.slack_id:
                 logger.warning("No CcUser.slack_id for email=%s", user_email)
                 continue
+            messages.append({
+                "email": user_email,
+                "issues": issues,
+            })
+            if dry_run:
+                continue
             slack_chat = SlackChat.objects.filter(members=user).filter(members=martiska)
             if slack_chat.count() == 0:
                 if user == martiska:
@@ -64,4 +71,5 @@ It seems you have work to do with your credit card receipts:
             else:
                 slack_chat = slack_chat[0]
                 chat_id = slack_chat.chat_id
-            slack.chat.post_message(chat_id, slack_message)
+            # slack.chat.post_message(chat_id, slack_message)
+    return messages

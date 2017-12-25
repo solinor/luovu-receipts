@@ -17,6 +17,7 @@ urlpatterns = [
     url(r'^accounts/profile/$', RedirectView.as_view(pattern_name='frontpage', permanent=False)),
     url(r'^accounts/', include('googleauth.urls')),
     url(r'^import_html$', receipts.views.upload_invoice_html, name="import_html"),
+    url(r'^slack_notifications$', receipts.views.send_slack_notifications, name="slack_notifications"),
     url(r'^search$', receipts.views.search, name='search'),
     url(r'^stats$', receipts.views.stats, name='stats'),
 ]

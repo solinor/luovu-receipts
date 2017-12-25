@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<form method="post" action="{% url 'slack_notifications' %}" enctype="multipart/form-data">
+{% csrf_token %}
+{{ form.as_p }}
+<input type="submit" name="Import">
+</form>
+
+{% if slack_notifications %}
+<h2>Slack messages:</h2>
+
+<ul>
+  {% for item in slack_notifications %}
+  <li>To user {{ item.email }}:
+  <ul>
+    {% for issue in item.issues %}
+    <li>{{ issue }}</li>
+    {% endfor %}
+  </ul>
+  {% endfor %}
+</ul>
+{% endif %}
+
+{% endblock %}
