@@ -85,6 +85,7 @@ REDIRECT_OLD_DOMAIN = os.environ.get("REDIRECT_OLD_DOMAIN")
 
 MIDDLEWARE = [
     'receipts.middleware.DomainRedirectMiddleware',
+    'sslify.middleware.SSLifyMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -164,6 +165,7 @@ DATABASES['default'].update(DB_FROM_ENV)
 
 # Honor the 'X-Forwarded-Proto' header for request.is_secure()
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_SSL_REDIRECT = os.environ.get("SECURE_SSL_REDIRECT", True) in (True, "True", "true")
 
 # Allow all host headers
 ALLOWED_HOSTS = ['*']
