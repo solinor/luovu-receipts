@@ -71,5 +71,5 @@ It seems you have work to do with your credit card receipts:
             else:
                 slack_chat = slack_chat[0]
                 chat_id = slack_chat.chat_id
-            # slack.chat.post_message(chat_id, slack_message)
+            slack.chat.post_message(chat_id, slack_message)
     return messages
