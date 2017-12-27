@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block header %}
+<style>
+.price {
+  text-align: right;
+}
+.summary-row th {
+  border-top-width: 3px !important;
+}
+.vertical-separator {
+  border-left: 1px solid #ddd;
+}
+.matching-row {
+  background-color: #f9fff9;
+}
+.non-matching-row {
+  background-color: #fff5f5;
+}
+</style>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script>
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+google.charts.load('current', {'packages':['bar']});
+google.charts.setOnLoadCallback(drawChart);
+function drawChart() {
+  var data = google.visualization.arrayToDataTable([
+    ['Month', 'Purchases', 'Receipts', 'Cash purchases'],
+    {% for row in chart_data %}
+    ['{{ row.0|date:"Y-m" }}', {{ row.1 }}, {{ row.2 }}, {{ row.3 }}]{% if not forloop.last %},{% endif %}
+    {% endfor %}
+  ]);
+
+  var options = {
+    chart: {
+      title: 'Credit card usage',
+    }
+  };
+
+  var chart = new google.charts.Bar(document.getElementById('cc_usage_chart'));
+
+  chart.draw(data, google.charts.Bar.convertOptions(options));
+}
+
+</script>
+{% endblock %}
+
+{% block content %}
+<ol class="breadcrumb">
+  <li><a href="/">Home</a></li>
+  <li class="active">All rows</li>
+</ol>
+
+<h2>{{ year }}-{{ month }}</h2>
+
+<div class="row" style="padding-bottom: 1em">
+  <div class="col-md-12">
+    {% if previous_months %}
+    <div class="dropdown" style="display: inline-block">
+      <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+        Change month
+        <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+        {% for previous_month in previous_months %}
+        <li><a href="{% url "all_receipts" previous_month.0.year previous_month.0.month %}">{{ previous_month.0|date:"Y-m" }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+
+<table class="table table-hover">
+  <thead>
+    <tr>
+      <th>User</th>
+      <th>Date</th>
+      <th class="vertical-separator">Invoice</th>
+      <th></th>
+      <th class="vertical-separator">Receipt</th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in table %}
+    <tr class="{% if not row.matching %}non-matching-row{% endif %}">
+      <td>{% if row.user_email %}<a href="{% url 'person' row.user_email year month %}">{{ row.user_email }}</a>{% endif %}</td>
+      <td>{{ row.items.0 }}</td>
+      {% if row.items.1 %}
+        <td class="vertical-separator">{{ row.items.1.description }}</td>
+        <td class="price">{{ row.items.1.row_price }}&euro;{% if row.items.1.foreign_currency %} ({{ row.items.1.foreign_currency}} {{ row.items.1.foreign_currency_name}}){% endif %}</td>
+      {% else %}
+        <td class="vertical-separator"></td>
+        <td></td>
+      {% endif %}
+      {% if row.items.2 %}
+      <td class="vertical-separator"><a href="{% url 'receipt' row.items.2.luovu_id %}">{% if row.items.2.has_description %}{{ row.items.2.description }}{% else %}[no description]{% endif %}</a>{% if row.items.2.autodetected_language == "fi" %} <span class="glyphicon glyphicon-exclamation-sign" data-toggle="tooltip" data-placement="right" title="This seems to be in Finnish. English is highly preferred." aria-hidden="true"></span>
+{% endif %}</td>
+      <td class="price">{{ row.items.2.price }}&euro;</td>
+      <td><a href="{% url "redirect_to_luovu" row.items.2.luovu_user row.items.2.luovu_id %}">Luovu</td>
+      {% else %}
+      <td class="vertical-separator"></td>
+      <td></td>
+      <td></td>
+      {% endif %}
+    </tr>
+    {% endfor %}
+  </tbody>
+  <tfoot>
+    <tr class="summary-row">
+      <th></th>
+      <th></th>
+      <th></th>
+      <th class="price">{{ invoice_total }}&euro;</th>
+      <th class="vertical-separator"></th>
+      <th class="price">{{ receipts_total }}&euro;</th>
+      <th></th>
+    </tr>
+  </tfoot>
+</table>
+
+<div id="cc_usage_chart" style="width: 100%; height: 500px;"></div>
+
+{% endblock %}

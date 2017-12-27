@@ -20,13 +20,13 @@ def create_receipts_table(sorted_table):
         for item in invoice_rows:
             if len(receipt_rows[item.row_price]):
                 receipt = receipt_rows[item.row_price].pop()
-                row = {"matching": True, "items": [date, item, receipt]}
+                row = {"matching": True, "user_email": receipt.luovu_user, "items": [date, item, receipt]}
             else:
-                row = {"matching": False, "items": [date, item, None]}
+                row = {"matching": False, "user_email": item.card_holder_email_guess, "items": [date, item, None]}
             table.append(row)
         for item in receipt_rows.values():
             for receipt in item:
-                row = {"matching": False, "items": [date, None, receipt]}
+                row = {"matching": False, "user_email": receipt.luovu_user, "items": [date, None, receipt]}
                 table.append(row)
     return table
 
