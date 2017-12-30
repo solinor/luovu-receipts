@@ -76,7 +76,7 @@ def process_receipt(user_email, receipt):
         "description": receipt["description"],
         "filename": receipt["filename"],
         "mime_type": receipt["mime_type"],
-        "date": datetime.datetime.strptime(receipt["date"], "%Y-%m-%d").date(),
+        "date": receipt["date"],
         "state": receipt["state"],
         "receipt_type": receipt["type"],
         "uploader": receipt["uploader"],
@@ -85,14 +85,13 @@ def process_receipt(user_email, receipt):
     total_price = 0
     account_number = None
     for price in receipt["prices"]:
-        if price["account_number"] != "0":
-            account_number = int(price["account_number"])
-        if price["price"].startswith("-"):
+        if price["account_number"] != 0:
+            account_number = price["account_number"]
+        if price["price"] < 0:
             continue
-        parsed_price = luovu_api.format_price(price["price"])
-        price_obj = LuovuPrice(price=parsed_price, vat_percent=int(price["vat_percent"]), receipt=obj, account_number=int(price["account_number"]))
+        price_obj = LuovuPrice(price=price["price"], vat_percent=price["vat_percent"], receipt=obj, account_number=price["account_number"])
         price_obj.save()
-        total_price += parsed_price
+        total_price += price["price"]
     obj.price = total_price
     obj.account_number = account_number
     obj.save()

@@ -4,6 +4,13 @@ import uuid
 import requests
 import schema
 
+
+def format_luovu_price(price):
+    if len(price) <= 2:
+        return float(price) / 100
+    return float(price[:-2]) + (float(price[-2:]) / 100)
+
+
 BASE_SCHEMA = {
     "id": schema.Use(int),
     "date": schema.Use(lambda k: datetime.datetime.strptime(k, "%Y-%m-%d").date()),
@@ -16,7 +23,7 @@ BASE_SCHEMA = {
     "uploader": schema.And(str, schema.Use(str.lower), schema.Regex("[a-z0-9-_\.]+@[a-z0-9-_\.]+")),
     "business_id": str,
     "state": str,
-    "prices": [{"price": schema.Use(lambda k: float(k) / 100), "vat_percent": schema.Use(int), "account_number": str}],
+    "prices": [{"price": schema.Use(format_luovu_price), "vat_percent": schema.Use(int), "account_number": schema.Use(int)}],
 }
 
 RECEIPT_LIST_SCHEMA = schema.Schema([BASE_SCHEMA], ignore_extra_keys=True)
@@ -66,9 +73,3 @@ class LuovuApi(object):
     def get_receipt(self, item_id):
         response = self._retry_request(0, "https://api.luovu.com/api/item/%s" % item_id)
         return SINGLE_RECEIPT_SCHEMA.validate(response)
-
-    @classmethod
-    def format_price(cls, price):
-        if len(price) <= 2:
-            return float(price) / 100
-        return float(price[:-2]) + (float(price[-2:]) / 100)
