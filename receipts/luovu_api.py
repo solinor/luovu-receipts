@@ -6,9 +6,13 @@ import schema
 
 
 def format_luovu_price(price):
+    multiplier = 1
+    if price.startswith("-"):
+        price = price[1:]
+        multiplier = -1
     if len(price) <= 2:
-        return float(price) / 100
-    return float(price[:-2]) + (float(price[-2:]) / 100)
+        return float(price) / 100 * multiplier
+    return multiplier * float(price[:-2]) + (float(price[-2:]) / 100)
 
 
 BASE_SCHEMA = {
