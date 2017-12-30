@@ -8,6 +8,7 @@ BASE_SCHEMA = {
     "id": schema.Use(int),
     "date": schema.Use(lambda k: datetime.datetime.strptime(k, "%Y-%m-%d").date()),
     "uploaded": schema.Use(lambda k: datetime.datetime.strptime(k, "%Y-%m-%d %H:%M:%S")),
+    "barcode": str,
     "description": str,
     "place_of_purchase": str,
     "mime_type": schema.And(str, len),
