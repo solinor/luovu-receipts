@@ -1,5 +1,27 @@
 import requests
+import schema
 import uuid
+import datetime
+
+
+BASE_SCHEMA = {
+    "id": schema.Use(int),
+    "date": schema.Use(lambda k: datetime.datetime.strptime(k, "%Y-%m-%d").date()),
+    "uploaded": schema.Use(lambda k: datetime.datetime.strptime(k, "%Y-%m-%d %H:%M:%S")),
+    "description": str,
+    "place_of_purchase": str,
+    "mime_type": schema.And(str, len),
+    "filename": str,
+    "uploader": schema.And(str, schema.Use(str.lower), schema.Regex("[a-z0-9-_\.]+@[a-z0-9-_\.]+")),
+    "business_id": str,
+    "state": str,
+    "prices": [{"price": schema.Use(lambda k: float(k) / 100), "vat_percent": schema.Use(int), "account_number": str}],
+}
+
+RECEIPT_LIST_SCHEMA = schema.Schema([BASE_SCHEMA], ignore_extra_keys=True)
+SINGLE_RECEIPT_SCHEMA = dict(BASE_SCHEMA)
+SINGLE_RECEIPT_SCHEMA["attachment"] = schema.And(str, schema.Regex("^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$"))
+SINGLE_RECEIPT_SCHEMA = schema.Schema(SINGLE_RECEIPT_SCHEMA, ignore_extra_keys=True)
 
 
 class LuovuApi(object):
@@ -37,10 +59,12 @@ class LuovuApi(object):
         return data
 
     def get_receipts(self, email, start_date, end_date, retry=0):
-        return self._retry_request(0, "https://api.luovu.com/api/items?username=%s&business_id=%s&business_unit=1234&startdate=%s&enddate=%s&random=%s" % (email, self.business_id, start_date.strftime("%Y-%m-%d"), end_date.strftime("%Y-%m-%d"), uuid.uuid4()))
+        response = self._retry_request(0, "https://api.luovu.com/api/items?username=%s&business_id=%s&business_unit=1234&startdate=%s&enddate=%s&random=%s" % (email, self.business_id, start_date.strftime("%Y-%m-%d"), end_date.strftime("%Y-%m-%d"), uuid.uuid4()))
+        return RECEIPT_LIST_SCHEMA.validate(response)
 
     def get_receipt(self, item_id):
-        return self._retry_request(0, "https://api.luovu.com/api/item/%s" % item_id)
+        response = self._retry_request(0, "https://api.luovu.com/api/item/%s" % item_id)
+        return SINGLE_RECEIPT_SCHEMA.validate(response)
 
     @classmethod
     def format_price(cls, price):
