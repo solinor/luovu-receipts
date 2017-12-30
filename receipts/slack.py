@@ -1,12 +1,11 @@
 import logging
 
-
 import slacker
-from receipts.models import LuovuReceipt, InvoiceRow, CcUser, SlackChat
-
 from django.conf import settings
 from django.db.models import Q
 from django.db.models.functions import Length
+
+from receipts.models import CcUser, InvoiceRow, LuovuReceipt, SlackChat
 
 slack = slacker.Slacker(settings.SLACK_BOT_ACCESS_TOKEN)
 logger = logging.getLogger(__name__)

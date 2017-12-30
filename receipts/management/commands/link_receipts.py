@@ -1,8 +1,11 @@
-from django.core.management.base import BaseCommand, CommandError
-from receipts.models import InvoiceRow, LuovuPrice, LuovuReceipt, InvoiceReceipt
-from django.conf import settings
-from django.utils import timezone
 import datetime
+
+from django.conf import settings
+from django.core.management.base import BaseCommand, CommandError
+from django.utils import timezone
+
+from receipts.models import InvoiceReceipt, InvoiceRow, LuovuPrice, LuovuReceipt
+
 
 class Command(BaseCommand):
     help = 'Automatically link unlinked receipts when possible'

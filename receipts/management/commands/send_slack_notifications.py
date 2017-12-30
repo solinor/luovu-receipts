@@ -1,5 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
+
 from receipts.slack import send_notifications
+
 
 class Command(BaseCommand):
     help = 'Send slack notifications'

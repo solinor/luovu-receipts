@@ -1,6 +1,9 @@
-from django.core.management.base import BaseCommand, CommandError
-from receipts.utils import refresh_receipts_for_user
 import datetime
+
+from django.core.management.base import BaseCommand, CommandError
+
+from receipts.utils import refresh_receipts_for_user
+
 
 class Command(BaseCommand):
     help = 'Refreshes receipts from Luovu for specified users'

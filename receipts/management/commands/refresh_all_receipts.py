@@ -1,7 +1,10 @@
-from django.core.management.base import BaseCommand, CommandError
-from receipts.utils import refresh_receipts_for_user, get_all_users
-from receipts.models import InvoiceRow, LuovuReceipt
 import datetime
+
+from django.core.management.base import BaseCommand, CommandError
+
+from receipts.models import InvoiceRow, LuovuReceipt
+from receipts.utils import get_all_users, refresh_receipts_for_user
+
 
 class Command(BaseCommand):
     help = 'Refreshes receipts for all known users'

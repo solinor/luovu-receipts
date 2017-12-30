@@ -1,5 +1,7 @@
-from django import forms
 import datetime
+
+from django import forms
+
 
 class UploadFileForm(forms.Form):
     year = forms.IntegerField()

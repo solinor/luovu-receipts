@@ -1,8 +1,11 @@
-from django.core.management.base import BaseCommand, CommandError
-from receipts.models import InvoiceRow
-from receipts.html_parser import HtmlParser
-from django.conf import settings
 import datetime
+
+from django.conf import settings
+from django.core.management.base import BaseCommand, CommandError
+
+from receipts.html_parser import HtmlParser
+from receipts.models import InvoiceRow
+
 
 class Command(BaseCommand):
     help = 'Imports html invoice file'

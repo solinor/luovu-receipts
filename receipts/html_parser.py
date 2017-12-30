@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-import sys
 import datetime
+import sys
 
 from bs4 import BeautifulSoup
 

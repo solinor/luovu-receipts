@@ -1,8 +1,8 @@
+import datetime
+import uuid
+
 import requests
 import schema
-import uuid
-import datetime
-
 
 BASE_SCHEMA = {
     "id": schema.Use(int),

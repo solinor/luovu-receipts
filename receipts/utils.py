@@ -1,10 +1,11 @@
 import datetime
 from collections import defaultdict
 
-from receipts.models import LuovuReceipt, LuovuPrice, InvoiceRow
-from receipts.luovu_api import LuovuApi
-from django.contrib.auth.models import User
 from django.conf import settings
+from django.contrib.auth.models import User
+
+from receipts.luovu_api import LuovuApi
+from receipts.models import InvoiceRow, LuovuPrice, LuovuReceipt
 
 luovu_api = LuovuApi(settings.LUOVU_BUSINESS_ID, settings.LUOVU_PARTNER_TOKEN)  # pylint:disable=invalid-name
 luovu_api.authenticate(settings.LUOVU_USERNAME, settings.LUOVU_PASSWORD)

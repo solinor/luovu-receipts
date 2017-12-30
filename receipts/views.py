@@ -3,23 +3,25 @@ import calendar
 import datetime
 from collections import defaultdict
 
+import langdetect
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Sum
-from django.db.models.functions import TruncMonth, TruncYear, Length
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError, HttpResponseBadRequest
-from django.shortcuts import render, get_object_or_404
+from django.db.models.functions import Length, TruncMonth, TruncYear
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseRedirect, HttpResponseServerError
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
-from receipts.forms import UploadFileForm, SlackNotificationForm
+
+from receipts.forms import SlackNotificationForm, UploadFileForm
 from receipts.html_parser import HtmlParser
 from receipts.luovu_api import LuovuApi
-from receipts.models import LuovuReceipt, InvoiceRow, invoice_tuple
-from receipts.utils import get_all_users, refresh_receipts_for_user, get_latest_month_for_user, check_data_refresh, create_receipts_table
+from receipts.models import InvoiceRow, LuovuReceipt, invoice_tuple
 from receipts.slack import send_notifications
-import langdetect
+from receipts.utils import (check_data_refresh, create_receipts_table, get_all_users, get_latest_month_for_user,
+                            refresh_receipts_for_user)
 
 luovu_api = LuovuApi(settings.LUOVU_BUSINESS_ID, settings.LUOVU_PARTNER_TOKEN)  # pylint:disable=invalid-name
 luovu_api.authenticate(settings.LUOVU_USERNAME, settings.LUOVU_PASSWORD)
