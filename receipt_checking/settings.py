@@ -63,6 +63,8 @@ GOOGLEAUTH_IS_STAFF = False
 # list of default group names to assign to new users
 GOOGLEAUTH_GROUPS = []
 
+SECURE_HSTS_SECONDS = int(os.environ.get("SECURE_HSTS_SECONDS", 0))
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
