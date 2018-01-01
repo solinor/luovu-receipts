@@ -96,6 +96,8 @@ CSP_CONNECT_SRC = ("'none'",)
 CSP_STYLE_SRC = ("'self'", "'unsafe-inline'", "https://www.gstatic.com", "https://fonts.googleapis.com")
 CSP_IMG_SRC = ("'self'", "https://stats.g.doubleclick.net")
 CSP_REPORT_URI = "https://solinor.report-uri.com/r/d/csp/reportOnly"
+X_FRAME_OPTIONS = 'DENY'
+SECURE_CONTENT_TYPE_NOSNIFF = True
 
 MIDDLEWARE = [
     'receipts.middleware.DomainRedirectMiddleware',
