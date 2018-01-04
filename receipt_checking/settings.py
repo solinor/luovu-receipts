@@ -89,7 +89,7 @@ REDIRECT_OLD_DOMAIN = os.environ.get("REDIRECT_OLD_DOMAIN")
 
 CSP_DEFAULT_SRC = ("'none'",)
 CSP_SCRIPT_SRC = ("'self'", "'unsafe-inline'", "https://www.gstatic.com", "https://www.google-analytics.com", "https://www.googletagmanager.com", "https://stats.g.doubleclick.net", "https://ajax.googleapis.com", "https://rum-static.pingdom.net")
-CSP_OBJECT_SRC = ("'none'",)
+CSP_OBJECT_SRC = ("'self'",)  # required for PDF receipts
 CSP_MEDIA_SRC = ("'none'",)
 CSP_FRAME_SRC = ("'none'",)
 CSP_FONT_SRC = ("'self'", "https://fonts.gstatic.com")
