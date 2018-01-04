@@ -96,7 +96,7 @@ CSP_FONT_SRC = ("'self'", "https://fonts.gstatic.com")
 CSP_CONNECT_SRC = ("https://rum-collector-2.pingdom.net", "https://rum-collector-1.pingdom.net", "https://rum-collector-1.pingdom.net")
 CSP_STYLE_SRC = ("'self'", "'unsafe-inline'", "https://www.gstatic.com", "https://fonts.googleapis.com")
 CSP_IMG_SRC = ("'self'", "https://stats.g.doubleclick.net", "https://www.google-analytics.com")
-CSP_REPORT_URI = "https://solinor.report-uri.com/r/d/csp/reportOnly"
+CSP_REPORT_URI = os.environ.get("CSP_REPORT_URI")
 X_FRAME_OPTIONS = 'DENY'
 SECURE_CONTENT_TYPE_NOSNIFF = True
 
