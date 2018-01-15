@@ -66,7 +66,7 @@ function drawChart() {
       </button>
       <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
         {% for previous_month in previous_months %}
-        <li><a href="{% url "all_receipts" previous_month.0.year previous_month.0.month %}">{{ previous_month.0|date:"Y-m" }}</a></li>
+        <li><a href="{% url "all_receipts" previous_month.year previous_month.month %}">{{ previous_month|date:"Y-m" }}</a></li>
         {% endfor %}
       </ul>
     </div>
