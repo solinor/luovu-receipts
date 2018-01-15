@@ -103,7 +103,7 @@ function drawChart() {
       <td class="vertical-separator"><a href="{% url 'receipt' row.items.2.luovu_id %}">{% if row.items.2.has_description %}{{ row.items.2.description }}{% else %}[no description]{% endif %}</a>{% if row.items.2.autodetected_language == "fi" %} <span class="glyphicon glyphicon-exclamation-sign" data-toggle="tooltip" data-placement="right" title="This seems to be in Finnish. English is highly preferred." aria-hidden="true"></span>
 {% endif %}</td>
       <td class="price">{{ row.items.2.price }}&euro;</td>
-      <td><a rel="noopener" href="{% url "redirect_to_luovu" row.items.2.luovu_user row.items.2.luovu_id %}">Luovu</td>
+      <td>{% if row.items.2.luovu_user %}<a rel="noopener" href="{% url "redirect_to_luovu" row.items.2.luovu_user row.items.2.luovu_id %}">Luovu</a>{% endif %}</td>
       {% else %}
       <td class="vertical-separator"></td>
       <td></td>

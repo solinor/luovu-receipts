@@ -22,9 +22,9 @@ def refresh_slack_users():
 
 def send_notifications(year, month, dry_run=False):
     martiska = CcUser.objects.get(email="martiska.reinikka@solinor.com")
-    users = InvoiceRow.objects.filter(invoice_date__year=year, invoice_date__month=month).values_list("card_holder_email_guess").order_by("card_holder_email_guess").distinct("card_holder_email_guess")
+    users = InvoiceRow.objects.filter(invoice_date__year=year, invoice_date__month=month).values_list("card_holder_email_guess", flat=True).order_by("card_holder_email_guess").distinct("card_holder_email_guess")
     messages = []
-    for user_email, in users:  # unpack tuples
+    for user_email in users:
         user_invoice_rows_count = InvoiceRow.objects.filter(invoice_date__year=year, invoice_date__month=month).filter(card_holder_email_guess=user_email).count()
         user_receipts = LuovuReceipt.objects.exclude(state="deleted").filter(luovu_user=user_email).filter(date__year=year, date__month=month)
         user_receipts_count = user_receipts.count()

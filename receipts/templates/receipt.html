@@ -13,7 +13,7 @@
 <ol class="breadcrumb">
   <li><a href="/">Home</a></li>
   <li><a href="{% url 'people' receipt.date.year receipt.date.month %}">People</a></li>
-  <li><a href="{% url 'person' receipt.luovu_user receipt.date.year receipt.date.month %}">Person: {{ receipt.luovu_user }}</a></li>
+  <li>{% if receipt.luovu_user %}<a href="{% url 'person' receipt.luovu_user receipt.date.year receipt.date.month %}">Person: {{ receipt.luovu_user }}</a>{% else %}Person: unknown{% endif %}</li>
   <li class="active">Receipt</li>
 </ol>
 

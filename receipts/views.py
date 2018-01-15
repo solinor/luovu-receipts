@@ -86,8 +86,8 @@ def receipt_details(request, receipt_id):
 
 @login_required
 def people_list_redirect(request):
-    months = InvoiceRow.objects.values_list("invoice_date").order_by("-invoice_date").distinct("invoice_date")
-    return HttpResponseRedirect(reverse("people", args=(months[0][0].year, months[0][0].month)))
+    months = InvoiceRow.objects.values_list("invoice_date", flat=True).order_by("-invoice_date").distinct("invoice_date")
+    return HttpResponseRedirect(reverse("people", args=(months[0].year, months[0].month)))
 
 
 @login_required
@@ -353,12 +353,12 @@ def stats(request):
     chart_data = sorted(chart_data.values(), key=lambda k: k[0])
 
 
-    prices = InvoiceRow.objects.filter(row_price__gt=0).values_list("row_price")
+    prices = InvoiceRow.objects.filter(row_price__gt=0).values_list("row_price", flat=True)
     histogram_slots = (5, 10, 15, 20, 25, 50, 100, 250, 500, 750, 1000, 2000, 4000, 8000, 16000)
     count_histogram = {k: 0 for k in histogram_slots}
     sum_histogram = {k: 0 for k in histogram_slots}
 
-    for price, in prices:
+    for price in prices:
         for k in histogram_slots:
             if price < k:
                 count_histogram[k] += 1

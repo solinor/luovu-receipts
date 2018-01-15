@@ -49,13 +49,11 @@ def refresh_receipt(user_email, receipt_id):
 def get_latest_month_for_user(user_email):
     """ Returns latest month when specified user had receipts or invoice rows """
     try:
-        latest_invoice = InvoiceRow.objects.filter(card_holder_email_guess=user_email).values_list("invoice_date").latest("invoice_date")
-        latest_invoice = latest_invoice[0]
+        latest_invoice = InvoiceRow.objects.filter(card_holder_email_guess=user_email).values_list("invoice_date", flat=True).latest("invoice_date")
     except InvoiceRow.DoesNotExist:
         latest_invoice = None
     try:
-        latest_receipt = LuovuReceipt.objects.filter(luovu_user=user_email).values_list("date").latest("date")
-        latest_receipt = latest_receipt[0]
+        latest_receipt = LuovuReceipt.objects.filter(luovu_user=user_email).values_list("date", flat=True).latest("date")
     except LuovuReceipt.DoesNotExist:
         latest_receipt = None
     if latest_invoice is None:
@@ -98,16 +96,16 @@ def process_receipt(user_email, receipt):
 
 
 def get_all_users():
-    people_with_invoices = InvoiceRow.objects.values_list("card_holder_email_guess").distinct()
-    people_with_receipts = LuovuReceipt.objects.values_list("luovu_user")
-    django_users = User.objects.values_list("email")
+    people_with_invoices = InvoiceRow.objects.values_list("card_holder_email_guess", flat=True).distinct()
+    people_with_receipts = LuovuReceipt.objects.values_list("luovu_user", flat=True).distinct()
+    django_users = User.objects.values_list("email", flat=True)
     people = set()
     for item in people_with_invoices:
-        people.add(item[0])
+        people.add(item)
     for item in people_with_receipts:
-        people.add(item[0])
+        people.add(item)
     for item in django_users:
-        people.add(item[0])
+        people.add(item)
     return sorted(people)
 
 
