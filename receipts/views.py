@@ -304,8 +304,12 @@ def person_details(request, user_email, year, month):
     check_data_refresh(request)
     user_invoice = InvoiceRow.objects.filter(card_holder_email_guess=user_email).filter(invoice_date__year=year, invoice_date__month=month)
     user_receipts = LuovuReceipt.objects.filter(luovu_user=user_email).filter(date__year=year, date__month=month).exclude(state="deleted")
-    previous_months = InvoiceRow.objects.filter(card_holder_email_guess=user_email).values_list("invoice_date").order_by("-invoice_date").distinct("invoice_date")
-
+    previous_invoice_months = InvoiceRow.objects.filter(card_holder_email_guess=user_email).values_list("invoice_date", flat=True).order_by("-invoice_date").distinct("invoice_date")
+    previous_receipt_months = LuovuReceipt.objects.filter(luovu_user=user_email).annotate(month=TruncMonth("date")).order_by("month").values_list("month", flat=True)
+    previous_months = {k for k in previous_invoice_months}
+    for item in previous_receipt_months:
+        previous_months.add(item)
+    previous_months = sorted(list(previous_months), reverse=True)
     monthly_invoice_sum = InvoiceRow.objects.filter(card_holder_email_guess=user_email).annotate(month=TruncMonth("delivery_date")).order_by("month").values("month").annotate(price=Sum("row_price")).values("month", "price")
     monthly_cash_purchases_sum = LuovuReceipt.objects.filter(luovu_user=user_email).exclude(state="deleted").filter(account_number=1900).annotate(month=TruncMonth("date")).order_by("month").values("month").annotate(price=Sum("price")).values("month", "price")
     monthly_receipts_sum = LuovuReceipt.objects.filter(luovu_user=user_email).exclude(state="deleted").exclude(account_number=1900).annotate(month=TruncMonth("date")).order_by("month").values("month").annotate(price=Sum("price")).values("month", "price")
