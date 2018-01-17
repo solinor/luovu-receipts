@@ -23,7 +23,7 @@ def create_receipts_table(sorted_table):
                 receipt = receipt_rows[item.row_price].pop()
                 row = {"matching": True, "user_email": receipt.luovu_user, "items": [date, item, receipt]}
             else:
-                row = {"matching": False, "user_email": item.card_holder_email_guess, "items": [date, item, None]}
+                row = {"matching": False, "user_email": item.user_email, "items": [date, item, None]}
             table.append(row)
         for item in receipt_rows.values():
             for receipt in item:
