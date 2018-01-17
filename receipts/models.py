@@ -4,7 +4,7 @@ from collections import namedtuple
 
 from django.db import models
 
-invoice_tuple = namedtuple("InvoiceRowTuple", ["user_email", "row_identifier", "description", "row_price", "account_number", "delivery_date"])
+invoice_tuple = namedtuple("InvoiceRowTuple", ["card_holder_email_guess", "row_identifier", "description", "row_price", "account_number", "delivery_date"])
 
 
 class CcUser(models.Model):
