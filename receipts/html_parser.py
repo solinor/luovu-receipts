@@ -3,6 +3,7 @@ import datetime
 import sys
 
 from bs4 import BeautifulSoup
+from django.conf import settings
 
 
 def null_op(data):
@@ -40,10 +41,8 @@ class HtmlParser(object):
         line = line.replace(u"Ö", u"o").replace(u"Ä", u"a")
         line = line.lower().strip()
         line = line.replace(u" ", u".")
-        line = line.replace(u"jaakko.santeri.raisanen", u"santeri.raisanen")
-        line = line.replace(u"rolando.ojeda.montiel", u"rolando.ojeda")
-        line = line.replace(u"jouni.ensio.jaakkola", u"jouni.jaakkola")
-        line = line.replace(u"vu.tri.tran", u"tri.tran")
+        for user1, user2 in USER_EMAIL_MAP:
+            line = line.replace(user1, user2)
         return line + u"@solinor.com"
 
     @classmethod

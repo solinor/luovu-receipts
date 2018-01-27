@@ -10,6 +10,7 @@ from receipts.models import CcUser, InvoiceRow, LuovuReceipt, SlackChat
 slack = slacker.Slacker(settings.SLACK_BOT_ACCESS_TOKEN)
 logger = logging.getLogger(__name__)
 
+
 def refresh_slack_users():
     slack_users = slack.users.list().body["members"]
     for member in slack_users:
@@ -20,8 +21,9 @@ def refresh_slack_users():
             "slack_id": member.get("id"),
         })
 
+
 def send_notifications(year, month, dry_run=False):
-    martiska = CcUser.objects.get(email="martiska.reinikka@solinor.com")
+    slack_admin = CcUser.objects.get(email=settings.SLACK_ADMIN_EMAIL)
     users = InvoiceRow.objects.filter(invoice_date__year=year, invoice_date__month=month).values_list("card_holder_email_guess", flat=True).order_by("card_holder_email_guess").distinct("card_holder_email_guess")
     messages = []
     for user_email in users:
@@ -30,9 +32,9 @@ def send_notifications(year, month, dry_run=False):
         user_receipts_count = user_receipts.count()
         issues = []
         if user_invoice_rows_count > user_receipts_count:
-            issues.append("You have %s receipts but invoice had %s rows for you. Please go to <https://solinor-receipts.herokuapp.com/person/%s/%s/%s|receipts checking service> to check what is missing and add missing receipts to <app.luovu.com/a/|Luovu>." % (user_receipts_count, user_invoice_rows_count, user_email, year, month))
+            issues.append("You have %s receipts but invoice had %s rows for you. Please go to <https://receipts.solinor.com/person/%s/%s/%s|receipts checking service> to check what is missing and add missing receipts to <app.luovu.com/a/|Luovu>." % (user_receipts_count, user_invoice_rows_count, user_email, year, month))
         elif user_invoice_rows_count < user_receipts_count:
-            issues.append("You have %s receipts but invoice had only %s rows for you. Please go to <https://solinor-receipts.herokuapp.com/person/%s/%s/%s|receipts checking service> to verify that you have correct data for your receipts." % (user_receipts_count, user_invoice_rows_count, user_email, year, month))
+            issues.append("You have %s receipts but invoice had only %s rows for you. Please go to <https://receipts.solinor.com/person/%s/%s/%s|receipts checking service> to verify that you have correct data for your receipts." % (user_receipts_count, user_invoice_rows_count, user_email, year, month))
         empty_descriptions = user_receipts.annotate(description_len=Length("description")).filter(Q(description=None) | Q(description_len=0))
         for empty_description in empty_descriptions:
             issues.append("You have a receipt with empty description. Open <https://app.luovu.com/a/#i/%s|Luovu> to fix this." % empty_description.luovu_id)
@@ -56,15 +58,15 @@ It seems you have work to do with your credit card receipts:
             })
             if dry_run:
                 continue
-            slack_chat = SlackChat.objects.filter(members=user).filter(members=martiska)
+            slack_chat = SlackChat.objects.filter(members=user).filter(members=slack_admin)
             if slack_chat.count() == 0:
-                if user == martiska:
+                if user == slack_admin:
                     continue
-                slack_chat_details = slack.mpim.open(",".join([user.slack_id, martiska.slack_id]))
+                slack_chat_details = slack.mpim.open(",".join([user.slack_id, slackk_admin.slack_id]))
                 chat_id = slack_chat_details.body["group"]["id"]
                 slack_chat = SlackChat(chat_id=chat_id)
                 slack_chat.save()
-                slack_chat.members.add(martiska)
+                slack_chat.members.add(slack_admin)
                 slack_chat.members.add(user)
                 logger.info("Created a new slack.mpim for %s", user)
             else:

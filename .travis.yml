@@ -1,0 +1,10 @@
+language: python
+python:
+  - "3.6"
+install:
+  - pip install -r requirements.txt
+  - pip install pycodestyle pylint==1.7.5 pylint-django isort astroid==1.5.3
+script:
+  - sh run_pycodestyle.sh
+  - sh run_pylint.sh
+  - sh run_isort.sh
