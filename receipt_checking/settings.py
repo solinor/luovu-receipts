@@ -9,6 +9,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.10/ref/settings/
 """
 
+import json
 import os
 import sys
 
@@ -34,7 +35,10 @@ LUOVU_BUSINESS_ID = os.environ["LUOVU_BUSINESS_ID"]
 
 TAG_MANAGER_CODE = os.environ.get("TAG_MANAGER_CODE")
 
+USER_EMAIL_MAP = json.loads(os.environ["USER_EMAIL_MAP"])
+
 SLACK_BOT_ACCESS_TOKEN = os.environ["SLACK_BOT_ACCESS_TOKEN"]
+SLACK_ADMIN_EMAIL = os.environ["SLACK_ADMIN_EMAIL"]
 
 AUTHENTICATION_BACKENDS = (
     'googleauth.backends.GoogleAuthBackend',

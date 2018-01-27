@@ -14,6 +14,7 @@ class CcUser(models.Model):
     def __unicode__(self):
         return self.email
 
+
 class SlackChat(models.Model):
     chat_id = models.CharField(max_length=50, primary_key=True, editable=False)
     members = models.ManyToManyField(CcUser)

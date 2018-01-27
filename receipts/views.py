@@ -357,7 +357,6 @@ def stats(request):
             chart_data[row["month"]][3] = row["price"]
     chart_data = sorted(chart_data.values(), key=lambda k: k[0])
 
-
     prices = InvoiceRow.objects.filter(row_price__gt=0).values_list("row_price", flat=True)
     histogram_slots = (5, 10, 15, 20, 25, 50, 100, 250, 500, 750, 1000, 2000, 4000, 8000, 16000)
     count_histogram = {k: 0 for k in histogram_slots}
