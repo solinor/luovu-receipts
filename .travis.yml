@@ -1,10 +1,13 @@
 language: python
 python:
-  - "3.6"
+- '3.6'
 install:
-  - pip install -r requirements.txt
-  - pip install pycodestyle pylint==1.7.5 pylint-django isort astroid==1.5.3
+- pip install -r requirements.txt
+- pip install pycodestyle pylint==1.7.5 pylint-django isort astroid==1.5.3
 script:
-  - sh run_pycodestyle.sh
-  - sh run_pylint.sh
-  - sh run_isort.sh
+- sh run_pycodestyle.sh
+- sh run_pylint.sh
+- sh run_isort.sh
+notifications:
+  slack:
+    secure: RUQsmWBf0s7soYi4mXTglaqFCKUmq6zhgUZHmiedZvXGcns8Pe/1IosWDC4uVoIwTWIp2Osq3AoiX60b30SUrx0pBUdrqkQwOJy7fLx/tJBrrpD0xIiWY6xqEHbsM4ThSSr09IDT+fkAIhQ5OM7AydxmaLgUHfDJZuqw6p/Qqc7L7NfWBxr9yVFQOmv/aqF3OFdt2C7D6QQarvDLK/b82zIGN8o8RKMd3dG7oYUNyXqbwiK2ZsD+Cf27orntw6Va/mbd8/KpxyS2oLXbYW5Bjx5dZr1x+rx5RHOS7gq/WRQ9ZZHGxXl5V26n/G6s4tcUSc63ZHYzKFp+iUBr8ncvuwYOvROxSqNrHYore+ln6L4NiV6aGhTCsHsXKN+Wi0AjqrQtx5FPI8UcXpVm5KFKKgbOyl6KTbTHpvwKBZkaw49sIywy9NrOgNTUlKQgtWJQxFGOl2fxlpE1sfAqJQkvhXPi78I3atQIbMHfJsCZmkVj/Q181h9ctmlpkqcNi4wswa9lRvkCFRoQrE1O4oMp3zmEnZwRwM7NcU+d8rLVewRbZnWGAft0AThOLGeJnhOzLHda4wYiRZWdcJqeuLCNTojuvZUOMKqn/otsGKqKOU63QosCy/G7ujPmw2Q/MNCy3GGPda/SJjIajYn9JxOzNMyKls81GXW6uSP7KE6SzNU=
