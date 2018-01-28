@@ -85,7 +85,6 @@ INSTALLED_APPS = [
     'googleauth',
     'django.contrib.staticfiles',
     'receipts',
-    'raven.contrib.django.raven_compat',
     'django_extensions',
 ]
 
