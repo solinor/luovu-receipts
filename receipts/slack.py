@@ -45,7 +45,6 @@ def send_notifications(year, month, dry_run=False):
         elif user_receipts_sum > user_invoice_rows_sum:
             issues.append("Sum of your receipts (excluding cash purchases) is {}€, but you have {}€ in the invoice. If you have receipt(s) for cash purchases, please mark it to the correct category.".format(user_receipts_sum, user_invoice_rows_sum))
 
-
         empty_descriptions = user_receipts.annotate(description_len=Length("description")).filter(Q(description=None) | Q(description_len=0))
         for empty_description in empty_descriptions:
             issues.append("You have a receipt with empty description. Go to <https://app.luovu.com/a/#i/{}|Luovu> to fix this.".format(empty_description.luovu_id))
