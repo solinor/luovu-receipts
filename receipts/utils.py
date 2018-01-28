@@ -66,7 +66,6 @@ def get_latest_month_for_user(user_email):
 def process_receipt(user_email, receipt):
     if not receipt or not receipt["id"]:
         return
-    print("Processing %s for %s" % (user_email, receipt))
     obj, _ = LuovuReceipt.objects.update_or_create(luovu_id=receipt["id"], defaults={
         "luovu_user": user_email,
         "business_id": settings.LUOVU_BUSINESS_ID,
