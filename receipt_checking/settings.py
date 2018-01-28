@@ -86,6 +86,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'receipts',
     'raven.contrib.django.raven_compat',
+    'django_extensions',
 ]
 
 REDIRECT_NEW_DOMAIN = os.environ.get("REDIRECT_NEW_DOMAIN")

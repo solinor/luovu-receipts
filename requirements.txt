@@ -1,6 +1,7 @@
 beautifulsoup4==4.6.0
 dj-database-url==0.4.2
 django-csp==3.3
+django-extensions==1.9.9
 django-filter==1.1.0
 django-tables2==1.17.1
 Django>=2.0
