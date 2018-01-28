@@ -2,7 +2,7 @@ import logging
 
 import slacker
 from django.conf import settings
-from django.db.models import Q
+from django.db.models import Q, Sum
 from django.db.models.functions import Length
 
 from receipts.models import CcUser, InvoiceRow, LuovuReceipt, SlackChat
@@ -27,23 +27,61 @@ def send_notifications(year, month, dry_run=False):
     users = InvoiceRow.objects.filter(invoice_date__year=year, invoice_date__month=month).values_list("card_holder_email_guess", flat=True).order_by("card_holder_email_guess").distinct("card_holder_email_guess")
     messages = []
     for user_email in users:
-        user_invoice_rows_count = InvoiceRow.objects.filter(invoice_date__year=year, invoice_date__month=month).filter(card_holder_email_guess=user_email).count()
-        user_receipts = LuovuReceipt.objects.exclude(state="deleted").filter(luovu_user=user_email).filter(date__year=year, date__month=month)
+        user_invoice_rows = InvoiceRow.objects.filter(invoice_date__year=year, invoice_date__month=month).filter(card_holder_email_guess=user_email)
+        user_invoice_rows_count = user_invoice_rows.count()
+        user_invoice_rows_sum = user_invoice_rows.aggregate(sum=Sum("row_price"))["sum"]
+        user_receipts = LuovuReceipt.objects.exclude(state="deleted").exclude(account_number=1900).filter(luovu_user=user_email).filter(date__year=year, date__month=month)
         user_receipts_count = user_receipts.count()
+        user_receipts_sum = user_receipts.aggregate(sum=Sum("price"))["sum"]
+
         issues = []
         if user_invoice_rows_count > user_receipts_count:
-            issues.append("You have %s receipts but invoice had %s rows for you. Please go to <https://receipts.solinor.com/person/%s/%s/%s|receipts checking service> to check what is missing and add missing receipts to <app.luovu.com/a/|Luovu>." % (user_receipts_count, user_invoice_rows_count, user_email, year, month))
+            issues.append("You have {} receipts but invoice had {} rows for you.".format(user_receipts_count, user_invoice_rows_count))
         elif user_invoice_rows_count < user_receipts_count:
-            issues.append("You have %s receipts but invoice had only %s rows for you. Please go to <https://receipts.solinor.com/person/%s/%s/%s|receipts checking service> to verify that you have correct data for your receipts." % (user_receipts_count, user_invoice_rows_count, user_email, year, month))
+            issues.append("You have {} receipts but invoice had only {} rows for you. If you have a receipt for a cash purchase, please mark it to the correct category.".format(user_receipts_count, user_invoice_rows_count))
+
+        if user_invoice_rows_sum > user_receipts_sum:
+            issues.append("Sum of your receipts (excluding cash purchases) is {}€, but you have {}€ in the invoice. Please check whether some receipts are missing, or and that you entered the correct sums for each receipts.".format(user_receipts_sum, user_invoice_rows_sum))
+        elif user_receipts_sum > user_invoice_rows_sum:
+            issues.append("Sum of your receipts (excluding cash purchases) is {}€, but you have {}€ in the invoice. If you have receipt(s) for cash purchases, please mark it to the correct category.".format(user_receipts_sum, user_invoice_rows_sum))
+
+
         empty_descriptions = user_receipts.annotate(description_len=Length("description")).filter(Q(description=None) | Q(description_len=0))
         for empty_description in empty_descriptions:
-            issues.append("You have a receipt with empty description. Open <https://app.luovu.com/a/#i/%s|Luovu> to fix this." % empty_description.luovu_id)
+            issues.append("You have a receipt with empty description. Go to <https://app.luovu.com/a/#i/{}|Luovu> to fix this.".format(empty_description.luovu_id))
         if len(issues) > 0:
-            slack_message = """Hi there!
-It seems you have work to do with your credit card receipts:
-"""
-            for issue in issues:
-                slack_message += "- %s\n" % issue
+            message = "\n".join(issues)
+            fallback_message = "Hi there!\n\nYou have work to do with your credit card receipts:\n" + message
+            attachment = {
+                "author_name": "Solinor Receipts",
+                "author_link": "https://receipts.solinor.com",
+                "fallback": fallback_message,
+                "title": "Work to do with credit card invoices",
+                "title_link": "https://app.luovu.com",
+                "text": message,
+                "fields": [
+                    {"title": "Your receipts", "value": "{}".format(user_receipts_count), "short": True},
+                    {"title": "Rows in invoice", "value": "{}".format(user_invoice_rows_count), "short": True},
+                    {"title": "Sum of your receipts", "value": "{:02f}€".format(user_receipts_sum), "short": True},
+                    {"title": "Sum on the invoice", "value": "{:02f}€".format(user_invoice_rows_sum), "short": True},
+                    {"title": "Empty descriptions", "value": "{}".format(len(empty_descriptions)), "short": True}
+                ],
+                "actions": [
+                    {
+                        "type": "button",
+                        "text": "See the details",
+                        "url": "https://receipts.solinor.com/person/{}/{}/{}".format(user_email, year, month),
+                        "style": "primary",
+                    },
+                    {
+                        "type": "button",
+                        "text": "Upload receipts",
+                        "url": "https://app.luovu.com/",
+                    },
+                ],
+                "footer": "This notification is sent when a new CC invoice comes in."
+            }
+
             try:
                 user = CcUser.objects.get(email=user_email)
             except CcUser.DoesNotExist:
@@ -58,19 +96,7 @@ It seems you have work to do with your credit card receipts:
             })
             if dry_run:
                 continue
-            slack_chat = SlackChat.objects.filter(members=user).filter(members=slack_admin)
-            if slack_chat.count() == 0:
-                if user == slack_admin:
-                    continue
-                slack_chat_details = slack.mpim.open(",".join([user.slack_id, slackk_admin.slack_id]))
-                chat_id = slack_chat_details.body["group"]["id"]
-                slack_chat = SlackChat(chat_id=chat_id)
-                slack_chat.save()
-                slack_chat.members.add(slack_admin)
-                slack_chat.members.add(user)
-                logger.info("Created a new slack.mpim for %s", user)
-            else:
-                slack_chat = slack_chat[0]
-                chat_id = slack_chat.chat_id
-            slack.chat.post_message(chat_id, slack_message)
+
+            slack.chat.post_message(user.slack_id, attachments=[attachment], as_user="cc-bot")
+            slack.chat.post_message(slack_admin, text="This message was sent to {}:".format(user.email), attachments=[attachment], as_user="cc-bot")
     return messages
