@@ -97,13 +97,13 @@ def people_list(request, year, month):
     today = datetime.date(year, month, 1)
     people = [{"email": a, "data": defaultdict(int)} for a in get_all_users()]
     invoice_per_person_data = InvoiceRow.objects.filter(invoice_date__year=year).filter(invoice_date__month=month).values_list("card_holder_email_guess", "invoice_date").order_by("card_holder_email_guess", "invoice_date").annotate(rowcount=Count("row_identifier"))
-    receipts_per_user_data = LuovuReceipt.objects.filter(date__year=year, date__month=month).exclude(state="deleted").exclude(account_number=1900).annotate(month=TruncMonth("date")).values_list("luovu_user", "month").order_by("luovu_user", "month").annotate(rowcount=Count("pk"))
-    cash_purchases_per_user_data = LuovuReceipt.objects.filter(date__year=year, date__month=month).exclude(state="deleted").filter(account_number=1900).annotate(month=TruncMonth("date")).values_list("luovu_user", "month").order_by("luovu_user", "month").annotate(rowcount=Count("pk"))
+    receipts_per_user_data = LuovuReceipt.objects.filter(date__year=year, date__month=month).exclude(state__contains="deleted").exclude(account_number=1900).annotate(month=TruncMonth("date")).values_list("luovu_user", "month").order_by("luovu_user", "month").annotate(rowcount=Count("pk"))
+    cash_purchases_per_user_data = LuovuReceipt.objects.filter(date__year=year, date__month=month).exclude(state__contains="deleted").filter(account_number=1900).annotate(month=TruncMonth("date")).values_list("luovu_user", "month").order_by("luovu_user", "month").annotate(rowcount=Count("pk"))
     receipts_without_descriptions = LuovuReceipt.objects.exclude(state="deleted").filter(date__year=year, date__month=month).annotate(description_length=Length("description")).filter(description_length=0).values_list("luovu_user", "description_length").order_by("luovu_user", "description_length").annotate(rowcount=Count("pk"))
 
     invoice_sum_per_person = InvoiceRow.objects.filter(invoice_date__year=year).filter(invoice_date__month=month).values_list("card_holder_email_guess", "invoice_date").order_by("card_holder_email_guess", "invoice_date").annotate(price_sum=Sum("row_price"))
-    receipts_sum_per_user = LuovuReceipt.objects.filter(date__year=year, date__month=month).exclude(state="deleted").exclude(account_number=1900).annotate(month=TruncMonth("date")).values_list("luovu_user", "month").order_by("luovu_user", "month").annotate(price_sum=Sum("price"))
-    cash_purchases_sum_per_user = LuovuReceipt.objects.filter(date__year=year, date__month=month).exclude(state="deleted").filter(account_number=1900).annotate(month=TruncMonth("date")).values_list("luovu_user", "month").order_by("luovu_user", "month").annotate(price_sum=Sum("price"))
+    receipts_sum_per_user = LuovuReceipt.objects.filter(date__year=year, date__month=month).exclude(state__contains="deleted").exclude(account_number=1900).annotate(month=TruncMonth("date")).values_list("luovu_user", "month").order_by("luovu_user", "month").annotate(price_sum=Sum("price"))
+    cash_purchases_sum_per_user = LuovuReceipt.objects.filter(date__year=year, date__month=month).exclude(state__contains="deleted").filter(account_number=1900).annotate(month=TruncMonth("date")).values_list("luovu_user", "month").order_by("luovu_user", "month").annotate(price_sum=Sum("price"))
 
     def gen_user_dict():
         return defaultdict(int)

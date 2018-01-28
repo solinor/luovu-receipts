@@ -30,7 +30,7 @@ def send_notifications(year, month, dry_run=False):
         user_invoice_rows = InvoiceRow.objects.filter(invoice_date__year=year, invoice_date__month=month).filter(card_holder_email_guess=user_email)
         user_invoice_rows_count = user_invoice_rows.count()
         user_invoice_rows_sum = user_invoice_rows.aggregate(sum=Sum("row_price"))["sum"]
-        user_receipts = LuovuReceipt.objects.exclude(state="deleted").exclude(account_number=1900).filter(luovu_user=user_email).filter(date__year=year, date__month=month)
+        user_receipts = LuovuReceipt.objects.exclude(state__contains="deleted").exclude(account_number=1900).filter(luovu_user=user_email).filter(date__year=year, date__month=month)
         user_receipts_count = user_receipts.count()
         user_receipts_sum = user_receipts.aggregate(sum=Sum("price"))["sum"]
 
