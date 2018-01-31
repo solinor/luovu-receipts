@@ -7,8 +7,7 @@ from django.contrib.auth.models import User
 from receipts.luovu_api import LuovuApi
 from receipts.models import InvoiceRow, LuovuPrice, LuovuReceipt
 
-luovu_api = LuovuApi(settings.LUOVU_BUSINESS_ID, settings.LUOVU_PARTNER_TOKEN)  # pylint:disable=invalid-name
-luovu_api.authenticate(settings.LUOVU_USERNAME, settings.LUOVU_PASSWORD)
+luovu_api = LuovuApi(settings.LUOVU_BUSINESS_ID, settings.LUOVU_PARTNER_TOKEN, username=settings.LUOVU_USERNAME, password=settings.LUOVU_PASSWORD)  # pylint:disable=invalid-name
 
 
 def create_receipts_table(sorted_table):

@@ -38,7 +38,7 @@ SINGLE_RECEIPT_SCHEMA = schema.Schema(SINGLE_RECEIPT_SCHEMA, ignore_extra_keys=T
 
 
 class LuovuApi(object):
-    def __init__(self, business_id, partner_token, user_token=None):
+    def __init__(self, business_id, partner_token, user_token=None, username=None, password=None):
         self.partner_token = partner_token
         self.business_id = business_id
         self.user_token = user_token
@@ -72,9 +72,11 @@ class LuovuApi(object):
         return data
 
     def get_receipts(self, email, start_date, end_date, retry=0):
+        self.authenticate(None, None)
         response = self._retry_request(0, "https://api.luovu.com/api/items?username=%s&business_id=%s&business_unit=1234&startdate=%s&enddate=%s&random=%s" % (email, self.business_id, start_date.strftime("%Y-%m-%d"), end_date.strftime("%Y-%m-%d"), uuid.uuid4()))
         return RECEIPT_LIST_SCHEMA.validate(response)
 
     def get_receipt(self, item_id):
+        self.authenticate(None, None)
         response = self._retry_request(0, "https://api.luovu.com/api/item/%s" % item_id)
         return SINGLE_RECEIPT_SCHEMA.validate(response)
