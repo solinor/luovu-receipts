@@ -106,7 +106,6 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 
 MIDDLEWARE = [
     'receipts.middleware.DomainRedirectMiddleware',
-    'sslify.middleware.SSLifyMiddleware',
     'csp.middleware.CSPMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -189,7 +188,6 @@ DATABASES['default'].update(DB_FROM_ENV)
 # Honor the 'X-Forwarded-Proto' header for request.is_secure()
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_SSL_REDIRECT = os.environ.get("SECURE_SSL_REDIRECT", True) in (True, "True", "true")
-SSLIFY_DISABLE = os.environ.get("SECURE_SSL_REDIRECT", False) not in (True, "True", "true")
 SESSION_COOKIE_SECURE = SECURE_SSL_REDIRECT
 CSRF_COOKIE_SECURE = SECURE_SSL_REDIRECT
 

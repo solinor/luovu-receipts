@@ -3,10 +3,9 @@ dj-database-url==0.4.2
 django-csp==3.3
 django-extensions==1.9.9
 django-filter==1.1.0
+django-googleauth-ng==2.3
 django-tables2==1.17.1
 Django>=2.0
-git+git://github.com/ojarva/django-googleauth.git@42f9cd8d3a5aee5b032d536ed213fcc0f72fb49a
-git+git://github.com/ojarva/django-sslify.git@0789e23f775705685b044d2984e426be33841423
 gunicorn==19.7.1
 langdetect==1.0.7
 psycopg2==2.7.3.2
