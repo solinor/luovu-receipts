@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load humanize %}
+{% load encode_email %}
 
 {% block header %}
 <style>
@@ -19,7 +20,6 @@
   background-color: #fff5f5;
 }
 </style>
-<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script>
 $(function () {
   $('[data-toggle="tooltip"]').tooltip()
@@ -90,7 +90,7 @@ function drawChart() {
   <tbody>
     {% for row in table %}
     <tr class="{% if not row.matching %}non-matching-row{% endif %}">
-      <td>{% if row.user_email %}<a href="{% url 'person' row.user_email year month %}">{{ row.user_email }}</a>{% endif %}</td>
+      <td>{% if row.user_email %}<a href="{% url 'person' row.user_email|encode_email year month %}">{{ row.user_email }}</a>{% endif %}</td>
       <td>{{ row.items.0 }}</td>
       {% if row.items.1 %}
         <td class="vertical-separator">{{ row.items.1.description }}</td>
@@ -100,7 +100,7 @@ function drawChart() {
         <td></td>
       {% endif %}
       {% if row.items.2 %}
-      <td class="vertical-separator"><a href="{% url 'receipt' row.items.2.luovu_id %}">{% if row.items.2.has_description %}{{ row.items.2.description }}{% else %}[no description]{% endif %}</a>{% if row.items.2.autodetected_language == "fi" %} <span class="glyphicon glyphicon-exclamation-sign" data-toggle="tooltip" data-placement="right" title="This seems to be in Finnish. English is highly preferred." aria-hidden="true"></span>
+      <td class="vertical-separator"><a href="{% url 'receipt' row.items.2.luovu_id %}" data-turbolinks="false">{% if row.items.2.has_description %}{{ row.items.2.description }}{% else %}[no description]{% endif %}</a>{% if row.items.2.autodetected_language == "fi" %} <span class="glyphicon glyphicon-exclamation-sign" data-toggle="tooltip" data-placement="right" title="This seems to be in Finnish. English is highly preferred." aria-hidden="true"></span>
 {% endif %}</td>
       <td class="price">{{ row.items.2.price }}&euro;</td>
       <td>{% if row.items.2.luovu_user %}<a rel="noopener" href="{% url "redirect_to_luovu" row.items.2.luovu_user row.items.2.luovu_id %}">Luovu</a>{% endif %}</td>

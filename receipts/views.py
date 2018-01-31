@@ -20,8 +20,8 @@ from receipts.html_parser import HtmlParser
 from receipts.luovu_api import LuovuApi
 from receipts.models import InvoiceRow, LuovuReceipt, invoice_tuple
 from receipts.slack import send_notifications
-from receipts.utils import (check_data_refresh, create_receipts_table, get_all_users, get_latest_month_for_user,
-                            refresh_receipts_for_user)
+from receipts.utils import (check_data_refresh, create_receipts_table, decode_email, encode_email, get_all_users,
+                            get_latest_month_for_user, refresh_receipts_for_user)
 
 luovu_api = LuovuApi(settings.LUOVU_BUSINESS_ID, settings.LUOVU_PARTNER_TOKEN)  # pylint:disable=invalid-name
 luovu_api.authenticate(settings.LUOVU_USERNAME, settings.LUOVU_PASSWORD)
@@ -304,6 +304,7 @@ def all_receipts(request, year, month):
 
 @login_required
 def person_details(request, user_email, year, month):
+    user_email = decode_email(user_email)
     year = int(year)
     month = int(month)
     check_data_refresh(request)

@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% load encode_email %}
+
 {% block content %}
 <h1>Search: {{ keyword }}</h1>
 
@@ -7,7 +9,7 @@
 <ul>
   {% for result in invoices %}
   {% if result.card_holder_email_guess %}
-  <li><a href="{% url "person" result.card_holder_email_guess result.invoice_date.year result.invoice_date.month %}">{{ result.delivery_date }} - {{ result.description }} - {{ result.row_price }}&euro; - {{ result.card_holder_email_guess }}</a> {{ result.similarity }}</li>
+  <li><a href="{% url "person" result.card_holder_email_guess|encode_email result.invoice_date.year result.invoice_date.month %}">{{ result.delivery_date }} - {{ result.description }} - {{ result.row_price }}&euro; - {{ result.card_holder_email_guess }}</a> {{ result.similarity }}</li>
   {% endif %}
   {% endfor %}
 </ul>

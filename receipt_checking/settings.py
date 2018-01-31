@@ -85,6 +85,7 @@ INSTALLED_APPS = [
     'googleauth',
     'django.contrib.staticfiles',
     'receipts',
+    'compressor',
     'django_extensions',
 ]
 
@@ -204,6 +205,12 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(PROJECT_ROOT, 'static'),
 ]
+
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    "compressor.finders.CompressorFinder",
+)
 
 # Simplified static file serving.
 # https://warehouse.python.org/project/whitenoise/

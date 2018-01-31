@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% load humanize %}
+{% load encode_email %}
 
 {% block header %}
 <style>
@@ -61,8 +62,8 @@
   <tbody>
     {% for person in people %}
     {% if person.email and person.data %}
-    <tr onclick="window.location='{% url 'person' person.email today.year today.month %}'" class="clickable-cell">
-      <td><a href="{% url 'person' person.email today.year today.month %}">{{ person.email }}</a></td>
+    <tr onclick="Turbolinks.visit('{% url 'person' person.email|encode_email today.year today.month %}'); return false" class="clickable-cell">
+      <td><a href="{% url 'person' person.email|encode_email today.year today.month %}">{{ person.email }}</a></td>
       <td class="number-column {% if person.data.sum_match %}matching-row{% else %}non-matching-row{% endif %}">{% if person.data.receipts_sum %}{{ person.data.receipts_sum|floatformat:2 }}{% endif %}</td>
       <td class="number-column {% if person.data.sum_match %}matching-row{% else %}non-matching-row{% endif %}">{% if person.data.invoice_sum %}{{ person.data.invoice_sum|floatformat:2 }}{% endif %}</td>
       <td class="number-column {% if person.data.count_match %}matching-row{% else %}non-matching-row{% endif %}">{% if person.data.receipt_rows %}{{ person.data.receipt_rows }}{% endif %}</td>
@@ -89,7 +90,7 @@
 </table>
 {% comment %}
 {% for date in person.dates %}
-<td {% if date.date %} onclick="window.location='{% url 'person' person.email date.date.year date.date.month %}';"{% endif %} class="{% if date.date %}clickable-cell {% if date.match %}matching-row{% else %}non-matching-row{% endif %}{% endif %}">{% if date.date %}<a href="{% url 'person' person.email date.date.year date.date.month %}"><span class="label label-primary"><span class="glyphicon glyphicon-credit-card" aria-hidden="true"></span> {{ date.receipt_rows }} out of {{ date.invoice_rows }}</span> {% if date.cash_purchase_rows > 0 %} + <span class="label label-success">{{ date.cash_purchase_rows }}</span>{% endif %}<br>
+<td {% if date.date %} onclick="window.location='{% url 'person' person.email|encode_email date.date.year date.date.month %}';"{% endif %} class="{% if date.date %}clickable-cell {% if date.match %}matching-row{% else %}non-matching-row{% endif %}{% endif %}">{% if date.date %}<a href="{% url 'person' person.email|encode_email date.date.year date.date.month %}"><span class="label label-primary"><span class="glyphicon glyphicon-credit-card" aria-hidden="true"></span> {{ date.receipt_rows }} out of {{ date.invoice_rows }}</span> {% if date.cash_purchase_rows > 0 %} + <span class="label label-success">{{ date.cash_purchase_rows }}</span>{% endif %}<br>
 {% if date.receipts_sum == date.invoice_sum %}{{ date.receipts_sum|floatformat:"0" }}&euro;{% else %}{{ date.receipts_sum|floatformat:"0" }}&euro; out of {{ date.invoice_sum|floatformat:"0" }}&euro;{% endif %}{% if date.cash_purchase_sum > 0 %} + {{ date.cash_purchase_sum|floatformat:"0" }}&euro; in cash purchases{% endif %}
 </a>{% endif %}</td>
 {% endfor %}

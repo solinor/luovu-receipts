@@ -115,3 +115,11 @@ def refresh_receipts_for_user(user_email, start_date, end_date):
         receipt_count += 1
         process_receipt(user_email, receipt)
     return receipt_count
+
+
+def encode_email(email):
+    return email.replace("@", "__at__").replace(".", "__")
+
+
+def decode_email(email):
+    return email.replace("__at__", "@").replace("__", ".")
