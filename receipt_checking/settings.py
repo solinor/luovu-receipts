@@ -22,7 +22,6 @@ PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.10/howto/deployment/checklist/
-RUM_CODE = os.environ.get("RUM_CODE")
 
 SECRET_KEY = os.environ.get("SECRET_KEY", "this-is-very-unsecure-default")
 
@@ -93,12 +92,12 @@ REDIRECT_NEW_DOMAIN = os.environ.get("REDIRECT_NEW_DOMAIN")
 REDIRECT_OLD_DOMAIN = os.environ.get("REDIRECT_OLD_DOMAIN")
 
 CSP_DEFAULT_SRC = ("'none'",)
-CSP_SCRIPT_SRC = ("'self'", "'unsafe-inline'", "https://www.gstatic.com", "https://www.google-analytics.com", "https://www.googletagmanager.com", "https://stats.g.doubleclick.net", "https://ajax.googleapis.com", "https://rum-static.pingdom.net")
+CSP_SCRIPT_SRC = ("'self'", "'unsafe-inline'", "https://www.gstatic.com", "https://www.google-analytics.com", "https://www.googletagmanager.com", "https://stats.g.doubleclick.net", "https://ajax.googleapis.com")
 CSP_OBJECT_SRC = ("'self'",)  # required for PDF receipts
 CSP_MEDIA_SRC = ("'none'",)
 CSP_FRAME_SRC = ("'none'",)
 CSP_FONT_SRC = ("'self'", "https://fonts.gstatic.com")
-CSP_CONNECT_SRC = ("https://rum-collector-2.pingdom.net", "https://rum-collector-1.pingdom.net", "https://rum-collector-1.pingdom.net")
+CSP_CONNECT_SRC = ("'self'")
 CSP_STYLE_SRC = ("'self'", "'unsafe-inline'", "https://www.gstatic.com", "https://fonts.googleapis.com")
 CSP_IMG_SRC = ("'self'", "https://stats.g.doubleclick.net", "https://www.google-analytics.com")
 CSP_REPORT_URI = os.environ.get("CSP_REPORT_URI")
