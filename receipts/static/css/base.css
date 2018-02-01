@@ -17,3 +17,35 @@ h2 {
 .strikethrough {
   text-decoration: line-through;
 }
+
+.people-table .matching-row {
+  background-color: #daffda;
+}
+.people-table .non-matching-row {
+  background-color: #ffdada;
+}
+.people-table a {
+  text-decoration:none;
+}
+.people-table .clickable-cell {
+  cursor: pointer;
+}
+.people-table .number-column {
+  text-align: right;
+}
+
+.receipts-table .price {
+  text-align: right;
+}
+.receipts-table .summary-row th {
+  border-top-width: 3px !important;
+}
+.receipts-table .vertical-separator {
+  border-left: 1px solid #ddd;
+}
+.receipts-table .matching-row {
+  background-color: #f9fff9;
+}
+.receipts-table .non-matching-row {
+  background-color: #fff5f5;
+}

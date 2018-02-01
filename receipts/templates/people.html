@@ -3,25 +3,7 @@
 {% load humanize %}
 {% load encode_email %}
 
-{% block header %}
-<style>
-.matching-row {
-  background-color: #daffda;
-}
-.non-matching-row {
-  background-color: #ffdada;
-}
-.table a {
-  text-decoration:none;
-}
-.table .clickable-cell {
-  cursor: pointer;
-}
-.number-column {
-  text-align: right;
-}
-</style>
-{% endblock %}
+{% block title %}People - Solinor receipts{% endblock %}
 
 {% block content %}
 <ol class="breadcrumb">
@@ -46,7 +28,7 @@
 </div>
 {% endif %}
 
-<table class="table table-hover">
+<table class="table table-hover people-table">
   <thead>
     <tr>
       <th>Email</th>
@@ -88,11 +70,4 @@
     </tr>
   </tfoot>
 </table>
-{% comment %}
-{% for date in person.dates %}
-<td {% if date.date %} onclick="window.location='{% url 'person' person.email|encode_email date.date.year date.date.month %}';"{% endif %} class="{% if date.date %}clickable-cell {% if date.match %}matching-row{% else %}non-matching-row{% endif %}{% endif %}">{% if date.date %}<a href="{% url 'person' person.email|encode_email date.date.year date.date.month %}"><span class="label label-primary"><span class="glyphicon glyphicon-credit-card" aria-hidden="true"></span> {{ date.receipt_rows }} out of {{ date.invoice_rows }}</span> {% if date.cash_purchase_rows > 0 %} + <span class="label label-success">{{ date.cash_purchase_rows }}</span>{% endif %}<br>
-{% if date.receipts_sum == date.invoice_sum %}{{ date.receipts_sum|floatformat:"0" }}&euro;{% else %}{{ date.receipts_sum|floatformat:"0" }}&euro; out of {{ date.invoice_sum|floatformat:"0" }}&euro;{% endif %}{% if date.cash_purchase_sum > 0 %} + {{ date.cash_purchase_sum|floatformat:"0" }}&euro; in cash purchases{% endif %}
-</a>{% endif %}</td>
-{% endfor %}
-{% endcomment %}
 {% endblock %}

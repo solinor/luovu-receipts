@@ -1,24 +1,9 @@
 {% extends "base.html" %}
 {% load humanize %}
 
+{% block title %}{{ user_email }} - Solinor Receipts{% endblock %}
+
 {% block header %}
-<style>
-.price {
-  text-align: right;
-}
-.summary-row th {
-  border-top-width: 3px !important;
-}
-.vertical-separator {
-  border-left: 1px solid #ddd;
-}
-.matching-row {
-  background-color: #f9fff9;
-}
-.non-matching-row {
-  background-color: #fff5f5;
-}
-</style>
 <script>
 $(function () {
   $('[data-toggle="tooltip"]').tooltip()
@@ -83,7 +68,7 @@ function drawChart() {
   </div>
 </div>
 
-<table class="table table-hover">
+<table class="table table-hover receipts-table">
   <thead>
     <tr>
       <th>Date</th>
