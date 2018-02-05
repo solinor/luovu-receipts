@@ -57,6 +57,7 @@ def send_notifications(year, month, dry_run=False):
                 "fallback": fallback_message,
                 "title": "Work to do with credit card invoices",
                 "title_link": "https://app.luovu.com",
+                "mrkdwn_in": ["text"],
                 "text": message,
                 "fields": [
                     {"title": "Your receipts", "value": "{}".format(user_receipts_count), "short": True},
