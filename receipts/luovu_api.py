@@ -42,8 +42,8 @@ class LuovuApi(object):
         self.partner_token = partner_token
         self.business_id = business_id
         self.user_token = user_token
-        self.username = None
-        self.password = None
+        self.username = username
+        self.password = password
 
     def authenticate(self, username, password, force=False):
         if username and password:
