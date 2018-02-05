@@ -41,7 +41,7 @@ class HtmlParser(object):
         line = line.replace(u"Ö", u"o").replace(u"Ä", u"a")
         line = line.lower().strip()
         line = line.replace(u" ", u".")
-        for user1, user2 in USER_EMAIL_MAP:
+        for user1, user2 in settings.USER_EMAIL_MAP:
             line = line.replace(user1, user2)
         return line + u"@solinor.com"
 
