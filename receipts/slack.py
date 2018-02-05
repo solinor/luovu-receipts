@@ -97,5 +97,5 @@ def send_notifications(year, month, dry_run=False):
                 continue
 
             slack.chat.post_message(user.slack_id, attachments=[attachment], as_user="cc-bot")
-            slack.chat.post_message(slack_admin, text="This message was sent to {}:".format(user.email), attachments=[attachment], as_user="cc-bot")
+            slack.chat.post_message(slack_admin.slack_id, text="This message was sent to {}:".format(user.email), attachments=[attachment], as_user="cc-bot")
     return messages
