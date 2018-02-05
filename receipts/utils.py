@@ -1,6 +1,7 @@
 import datetime
 from collections import defaultdict
 
+import schema
 from django.conf import settings
 from django.contrib.auth.models import User
 
@@ -41,7 +42,10 @@ def check_data_refresh(request):
 
 
 def refresh_receipt(user_email, receipt_id):
-    receipt_data = luovu_api.get_receipt(receipt_id)
+    try:
+        receipt_data = luovu_api.get_receipt(receipt_id)
+    except schema.SchemaUnexpectedTypeError:
+        return
     process_receipt(user_email, receipt_data)
 
 
