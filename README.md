@@ -58,6 +58,11 @@ G Suite is used for signing in. Steps to setup:
 - `python manage.py clearsessions` - daily. Clean up expired sessions from Django session storage.
 - `python manage.py refresh_slack_users` - daily. Sync user IDs from Slack to local database.
 
+*Heroku buildpacks*
+
+- heroku/python
+- https://github.com/ojarva/django-compressor-heroku-buildpack.git
+
 ## Syncing data
 
 Data is synced from three different places:
