@@ -49,6 +49,7 @@ G Suite is used for signing in. Steps to setup:
 - Sentry (free tier) for error reporting. Does not require configuring this app - when enabled, all errors will be sent automatically.
 - Deploy hook to send new deploys to Sentry. Follow instructions in Sentry.
 - Papertrail (Fixa, $7/month) for logging. Follow Papertrail instructions for setting up Heroku syslog destination. No configuration options in this app.
+- Heroku Postgres (Hobby basic, $9/month)
 - Heroku scheduler (free) for syncing and cleaning up.
 
 *Heroku scheduler configuration*:
