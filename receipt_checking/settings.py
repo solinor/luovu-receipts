@@ -70,6 +70,7 @@ GOOGLEAUTH_GROUPS = []
 SECURE_HSTS_SECONDS = int(os.environ.get("SECURE_HSTS_SECONDS", 0))
 
 INSTALLED_APPS = [
+    "raven.contrib.django.raven_compat",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
