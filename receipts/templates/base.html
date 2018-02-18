@@ -8,7 +8,11 @@
     {% tag_manager_snippet %}
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="theme-color" content="#222">
+    <meta name="google" content="notranslate">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="dns-prefetch" href="//app.luovu.com">
     <title>Receipt checking</title>
 
     {% compress css %}
@@ -18,7 +22,8 @@
     {% endcompress %}
 
     {% compress js %}
-    <script src="{% static "js/jquery.1.12.4.min.js" %}"></script>
+    <script src="{% static "js/jquery.3.2.1.min.js" %}"></script>
+    <script src="{% static "js/popper.min.js" %}"></script>
     <script src="{% static "js/bootstrap.min.js" %}"></script>
     <script src="{% static "js/turbolinks.js" %}"></script>
     {% endcompress %}
@@ -29,45 +34,41 @@
 </head>
 
 <body>
-  <nav class="navbar navbar-inverse navbar-fixed-top">
-    <div class="container">
-      <div class="navbar-header">
-        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-          <span class="sr-only">Toggle navigation</span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </button>
-        <a class="navbar-brand" href="{% if request.user.is_authenticated %}/{% else %}#{% endif %}">Solinor Receipts</a>
-      </div>
-      <div id="navbar" class="collapse navbar-collapse">
-        <ul class="nav navbar-nav">
-          {% if request.user.is_authenticated %}
-          <li><a href="{% url "frontpage" %}">Home</a></li>
-          <li><a href="{% url "people_list_redirect" %}">People</a></li>
-          <li><a href="{% url "stats" %}">Stats</a></li>
-          <li><a href="{% url "all_receipts_redirect" %}">All rows</a></li>
-          {% endif %}
-          {% block navbar_items %}{% endblock %}
-        </ul>
-        <form class="navbar-form navbar-right" action="{% url 'search' %}" method="get">
-          <input type="text" class="form-control" placeholder="Search..." name="q">
-        </form>
-        {% if request.user.is_staff %}
-        <ul class="nav navbar-nav pull-right">
-          <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-              Profile
-              <b class="caret"></b>
-            </a>
-            <ul class="dropdown-menu">
-              <li><a href="{% url 'import_html' %}">Import invoice</a></li>
-              <li><a href="{% url 'slack_notifications' %}">Slack notifications</a></li>
-            </ul>
-          </li>
-        </ul>
+  <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+    <a class="navbar-brand" href="{% url "frontpage" %}">Solinor Receipts</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <ul class="navbar-nav mr-auto">
+        {% if request.user.is_authenticated %}
+        <li class="nav-item"><a class="nav-link" href="{% url "frontpage" %}">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url "people_list_redirect" %}">People</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url "stats" %}">Stats</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url "all_receipts_redirect" %}">All rows</a></li>
         {% endif %}
-      </div><!--/.nav-collapse -->
+        {% block navbar_items %}{% endblock %}
+      </ul>
+
+      {% if request.user.is_staff %}
+      <ul class="navbar-nav pull-right">
+        <li class="nav-item dropdown">
+          <a href="#" class="nav-link dropdown-toggle" id="navDropdownActions" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Profile
+            <b class="caret"></b>
+          </a>
+          <div class="dropdown-menu" aria-labelledby="navDropdownActions">
+            <a class="dropdown-item" href="{% url 'import_html' %}">Import invoice</a>
+            <a class="dropdown-item" href="{% url 'slack_notifications' %}">Slack notifications</a>
+          </div>
+        </li>
+      </ul>
+      {% endif %}
+
+      <form method="get" action="{% url "search" %}" class="form-inline my-2 my-lg-0">
+         <input class="form-control mr-sm-2" type="text" name="q" placeholder="Search" aria-label="Search">
+      </form>
     </div>
   </nav>
   <div class="body-container">
