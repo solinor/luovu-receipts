@@ -4,7 +4,7 @@ django-compressor==2.2
 django-csp==3.3
 django-extensions==1.9.9
 django-filter==1.1.0
-django-googleauth-ng==2.3
+django-googleauth-ng==2.5
 django-tables2==1.17.1
 Django>=2.0
 gunicorn==19.7.1
