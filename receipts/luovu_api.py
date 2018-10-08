@@ -25,7 +25,7 @@ BASE_SCHEMA = {
     "place_of_purchase": str,
     "mime_type": schema.And(str, len),
     "filename": str,
-    "uploader": schema.And(str, schema.Use(str.lower), schema.Regex("[a-z0-9-_\.]+@[a-z0-9-_\.]+")),
+    "uploader": schema.And(str, schema.Use(str.lower), schema.Regex(r"[a-z0-9-_\.]+@[a-z0-9-_\.]+")),
     "business_id": str,
     "state": str,
     "prices": [{"price": schema.Use(format_luovu_price), "vat_percent": schema.Use(int), "account_number": schema.Use(int)}],
