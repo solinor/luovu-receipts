@@ -6,7 +6,7 @@ django-extensions==1.9.9
 django-filter==1.1.0
 django-googleauth-ng==2.5
 django-tables2==1.17.1
-Django>=2.0
+Django>=2.0,<2.0.99
 gunicorn==19.7.1
 langdetect==1.0.7
 psycopg2==2.7.3.2
