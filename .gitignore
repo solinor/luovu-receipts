@@ -4,3 +4,5 @@ dev/
 dev3/
 .env
 .idea
+.ideastaticfiles/
+.vscode
