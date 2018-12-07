@@ -154,8 +154,6 @@ SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.user.user_details',
 )
 
-
-
 ROOT_URLCONF = 'receipt_checking.urls'
 
 TEMPLATES = [

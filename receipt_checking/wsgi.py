@@ -10,11 +10,10 @@ https://docs.djangoproject.com/en/1.10/howto/deployment/wsgi/
 import os
 
 from django.core.wsgi import get_wsgi_application
-from whitenoise.django import DjangoWhiteNoise
-
 # Reads the key,value pair from .env file and adds them to environment variables
 # load_dotenv do not override existing System environment variables
 from dotenv import load_dotenv
+from whitenoise.django import DjangoWhiteNoise
 
 load_dotenv(verbose=True)
 
