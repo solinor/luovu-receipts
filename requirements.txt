@@ -4,7 +4,6 @@ django-compressor==2.2
 django-csp==3.3
 django-extensions==1.9.9
 django-filter==1.1.0
-django-googleauth-ng==2.5
 django-tables2==1.17.1
 Django>=2.0,<2.0.99
 gunicorn==19.7.1
@@ -16,4 +15,8 @@ raven>=3
 requests>=2.20.0
 schema==0.6.6
 slacker==0.9.60
+social-auth-app-django>=3.1.0
+# Note! Social auth back-ends are split -> needed cryptography dependencies which must be installed manually.
+# https://github.com/python-social-auth/social-core/blob/master/requirements-azuread.txt
+cryptography>=2.1.1
 whitenoise==3.3.1
