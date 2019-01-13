@@ -6,3 +6,5 @@ dev3/
 .idea
 .ideastaticfiles/
 .vscode
+venv
+receipt_checking/staticfiles
