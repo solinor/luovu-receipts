@@ -59,7 +59,7 @@ SOCIAL_AUTH_URL_NAMESPACE = 'social'
 
 
 INSTALLED_APPS = [
-    "raven.contrib.django.raven_compat",
+    # "raven.contrib.django.raven_compat",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
