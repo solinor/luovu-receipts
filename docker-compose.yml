@@ -3,7 +3,7 @@ services:
 
   luovu:
     build: .
-    restart: always
+    restart: on-failure
     ports:
       - "8000:8000"
     depends_on:

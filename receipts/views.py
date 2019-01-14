@@ -87,7 +87,10 @@ def receipt_details(request, receipt_id):
 @login_required
 def people_list_redirect(request):
     months = InvoiceRow.objects.values_list("invoice_date", flat=True).order_by("-invoice_date").distinct("invoice_date")
-    return HttpResponseRedirect(reverse("people", args=(months[0].year, months[0].month)))
+    if months:
+        return HttpResponseRedirect(reverse("people", args=(months[0].year, months[0].month)))
+    else:
+        return HttpResponseRedirect(reverse("frontpage"))
 
 
 @login_required
